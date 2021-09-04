@@ -1,0 +1,247 @@
+
+SQL*Loader: Release 19.0.0.0.0 - Production on Fri Sep 3 20:21:25 2021
+Version 19.3.0.0.0
+
+Copyright (c) 1982, 2019, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   ArchivoControl.ctl
+Character Set UTF8 specified for all input.
+
+Data File:      data\BlockbusterData.csv
+  Bad File:     bad/ArchivoControl.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 1
+Errors allowed: 50
+Bind array:     250 rows, maximum of 1048576 bytes
+Continuation:    none specified
+Path used:      Conventional
+
+Table TEMPORARY, loaded from every logical record.
+Insert option in effect for this table: TRUNCATE
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+NOMBRE_CLIENTE                      FIRST     *   ;       CHARACTER            
+CORREO_CLIENTE                       NEXT     *   ;       CHARACTER            
+CLIENTE_ACTIVO                       NEXT     *   ;       CHARACTER            
+FECHA_CREACION                       NEXT     *   ;       DATETIME YYYY-MM-DD HH24:MI:SS.FF
+TIENDA_PREFERIDA                     NEXT     *   ;       CHARACTER            
+DIRECCION_CLIENTE                    NEXT     *   ;       CHARACTER            
+CODIGO_POSTAL_CLIENTE                NEXT     *   ;       CHARACTER            
+CIUDAD_CLIENTE                       NEXT     *   ;       CHARACTER            
+PAIS_CLIENTE                         NEXT     *   ;       CHARACTER            
+FECHA_RENTA                          NEXT     *   ;       DATETIME YYYY-MM-DD HH24:MI:SS.FF
+FECHA_RETORNO                        NEXT     *   ;       DATETIME YYYY-MM-DD HH24:MI:SS.FF
+MONTO_A_PAGAR                        NEXT     *   ;       CHARACTER            
+FECHA_PAGO                           NEXT     *   ;       DATETIME YYYY-MM-DD HH24:MI:SS.FF
+NOMBRE_EMPLEADO                      NEXT     *   ;       CHARACTER            
+CORREO_EMPLEADO                      NEXT     *   ;       CHARACTER            
+EMPLEADO_ACTIVO                      NEXT     *   ;       CHARACTER            
+TIENDA_EMPLEADO                      NEXT     *   ;       CHARACTER            
+USUARIO_EMPLEADO                     NEXT     *   ;       CHARACTER            
+PASSWORD_EMPLEADO                    NEXT     *   ;       CHARACTER            
+DIRECCION_EMPLEADO                   NEXT     *   ;       CHARACTER            
+CODIGO_POSTAL_EMPLEADO               NEXT     *   ;       CHARACTER            
+CIUDAD_EMPLEADO                      NEXT     *   ;       CHARACTER            
+PAIS_EMPLEADO                        NEXT     *   ;       CHARACTER            
+NOMBRE_TIENDA                        NEXT     *   ;       CHARACTER            
+ENCARGADO_TIENDA                     NEXT     *   ;       CHARACTER            
+DIRECCION_TIENDA                     NEXT     *   ;       CHARACTER            
+CODIGO_POSTAL_TIENDA                 NEXT     *   ;       CHARACTER            
+CIUDAD_TIENDA                        NEXT     *   ;       CHARACTER            
+PAIS_TIENDA                          NEXT     *   ;       CHARACTER            
+TIENDA_PELICULA                      NEXT     *   ;       CHARACTER            
+NOMBRE_PELICULA                      NEXT     *   ;       CHARACTER            
+DESCRIPCION_PELICULA                 NEXT     *   ;       CHARACTER            
+ANO_LANZAMIENTO                      NEXT     *   ;       CHARACTER            
+DIAS_RENTA                           NEXT     *   ;       CHARACTER            
+COSTO_RENTA                          NEXT     *   ;       CHARACTER            
+DURACION                             NEXT     *   ;       CHARACTER            
+COSTO_POR_DANO                       NEXT     *   ;       CHARACTER            
+CLASIFICACION                        NEXT     *   ;       CHARACTER            
+LENGUAJE_PELICULA                    NEXT     *   ;       CHARACTER            
+CATEGORIA_PELICULA                   NEXT     *   ;       CHARACTER            
+ACTOR_PELICULA                       NEXT     *   ;       CHARACTER            
+
+value used for ROWS parameter changed from 250 to 99
+Record 63011: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63012: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63013: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63014: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63015: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63016: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63236: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63342: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63343: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63356: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63357: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63358: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63359: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63360: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63361: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63362: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63363: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63364: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63432: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63433: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63434: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63435: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63436: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63437: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63438: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63525: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63526: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63527: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63528: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63529: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63530: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63531: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63619: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01840: input value not long enough for date format
+
+Record 63620: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01840: input value not long enough for date format
+
+Record 63621: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01840: input value not long enough for date format
+
+Record 63622: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01840: input value not long enough for date format
+
+Record 63623: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01840: input value not long enough for date format
+
+Record 63831: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63832: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63833: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63834: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63835: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63836: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63837: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63838: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63863: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63864: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63865: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63866: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63867: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+Record 63891: Rejected - Error on table TEMPORARY, column FECHA_RETORNO.
+ORA-01841: (full) year must be between -4713 and +9999, and not be 0
+
+
+MAXIMUM ERROR COUNT EXCEEDED - Above statistics reflect partial run.
+
+Table TEMPORARY:
+  63840 Rows successfully loaded.
+  51 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+
+Space allocated for bind array:                1047222 bytes(99 rows)
+Read   buffer bytes: 1048576
+
+Total logical records skipped:          1
+Total logical records read:         63962
+Total logical records rejected:        51
+Total logical records discarded:        0
+
+Run began on Fri Sep 03 20:21:25 2021
+Run ended on Fri Sep 03 20:21:27 2021
+
+Elapsed time was:     00:00:02.53
+CPU time was:         00:00:00.81

@@ -1,5 +1,5 @@
-/* Author: Cristian Gomez 201801480 */
-/* Carga de datos */
+/* Author: Cristian Gomez - 201801480 */
+-- data upload
 
 LOAD DATA 
 INFILE 'C:\Users\crisg\Desktop\Semestre\Bases1\Proyecto1\BlockbusterData.csv'
@@ -52,7 +52,61 @@ LINES TERMINATED BY '\n'
     lenguaje_pelicula , --X
     categoria_pelicula , --X
     actor_pelicula 
+);
 
+
+OPTIONS (SKIP=1)
+LOAD DATA
+CHARACTERSET UTF8
+INFILE 'C:\Users\crisg\Desktop\Semestre\Bases1\Proyecto1\BlockbusterData.csv'
+INTO TABLE TEMPORARY TRUNCATE
+FIELDS TERMINATED BY ";"
+TRAILING NULLCOLS(
+    nombre_cliente ,
+    correo_cliente ,
+    cliente_activo ,
+    fecha_creacion TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF',
+    tienda_preferida ,
+    direccion_cliente ,
+    codigo_postal_cliente ,
+    ciudad_cliente ,
+    pais_cliente , 
+    fecha_renta TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF', 
+    fecha_retorno TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF', 
+    monto_a_pagar ,
+    fecha_pago TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF', 
+    /* EMPLOYEE */    
+    nombre_empleado ,
+    correo_empleado ,
+    empleado_activo ,
+    tienda_empleado ,
+    usuario_empleado ,
+    password_empleado ,
+    direccion_empleado ,
+    codigo_postal_empleado ,
+    ciudad_empleado ,
+    pais_empleado ,
+    /* EMPLOYEE */
+    /* SHOP */
+    nombre_tienda ,
+    encargado_tienda ,
+    direccion_tienda ,
+    codigo_postal_tienda ,
+    ciudad_tienda ,
+    pais_tienda , 
+    /* END SHOP */
+    tienda_pelicula ,  --X /* Ubicacion de la pelicula */
+    nombre_pelicula , --X
+    descripcion_pelicula , --X
+    ano_lanzamiento , --X
+    dias_renta , --X
+    costo_renta , --X
+    duracion , --X
+    costo_por_dano , --X
+    clasificacion , --X
+    lenguaje_pelicula , --X
+    categoria_pelicula , --X
+    actor_pelicula 
 );
 
 

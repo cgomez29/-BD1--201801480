@@ -3,3 +3,7 @@ ERD
 /*.csv
 /*.xlsx
 /*.pdf 
+**/*.localz
+**/*.local
+**/*.git
+**/*.DS_Store

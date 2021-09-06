@@ -2,6 +2,7 @@
 -- Borrado y creado de la tabla temporal 
 
 DROP TABLE TEMPORARY;
+SELECT COUNT(*) FROM TEMPORARY;
 
 CREATE TABLE TEMPORARY(
     nombre_cliente          VARCHAR2(100),

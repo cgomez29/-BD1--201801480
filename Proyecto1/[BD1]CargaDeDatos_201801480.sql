@@ -56,21 +56,21 @@
 -- ==================================================================================================
 
 INSERT INTO COUNTRY(name)
-SELECT pais_cliente 
-FROM TEMPORARY
-WHERE pais_cliente != '-'
-GROUP BY pais_cliente; 
+    SELECT pais_cliente 
+        FROM TEMPORARY
+            WHERE pais_cliente != '-'
+                GROUP BY pais_cliente; 
 
 -- ==================================================================================================
 -- Inserting data to the CITY table 
 -- ==================================================================================================
 
 INSERT INTO CITY(name, country_id)
-SELECT t.ciudad_cliente, c.country_id AS id
-FROM TEMPORARY t
-INNER JOIN COUNTRY c ON t.pais_cliente = c.name 
-WHERE t.ciudad_cliente != '-' and t.pais_cliente != '-'
-GROUP BY t.ciudad_cliente, c.country_id; 
+    SELECT t.ciudad_cliente, c.country_id AS id
+        FROM TEMPORARY t
+            INNER JOIN COUNTRY c ON t.pais_cliente = c.name 
+                WHERE t.ciudad_cliente != '-' and t.pais_cliente != '-'
+                    GROUP BY t.ciudad_cliente, c.country_id; 
 
 select * from city;
 
@@ -79,32 +79,34 @@ select * from city;
 -- ==================================================================================================
 
 INSERT INTO ACTOR(name, surname)
-SELECT 
-    SUBSTR(actor_pelicula, 1, INSTR(actor_pelicula, ' ')-1) as name,
-    SUBSTR(actor_pelicula, INSTR(actor_pelicula, ' ')+1) as surname    
-FROM TEMPORARY
-WHERE actor_pelicula != '-'
-GROUP BY actor_pelicula;
+    SELECT 
+        SUBSTR(actor_pelicula, 1, INSTR(actor_pelicula, ' ')-1) as name,
+        SUBSTR(actor_pelicula, INSTR(actor_pelicula, ' ')+1) as surname    
+    FROM TEMPORARY
+        WHERE actor_pelicula != '-'
+            GROUP BY actor_pelicula;
 
 -- ==================================================================================================
 -- Inserting data to the CATEGORY table 
 -- ==================================================================================================
 
 INSERT INTO CATEGORY(name)
-SELECT categoria_pelicula 
-FROM TEMPORARY
-WHERE categoria_pelicula != '-'
-GROUP BY categoria_pelicula;
+    SELECT categoria_pelicula 
+        FROM TEMPORARY
+            WHERE categoria_pelicula != '-'
+                GROUP BY categoria_pelicula;
 
 -- ==================================================================================================
 -- Inserting data to the LANGUAGE table 
 -- ==================================================================================================
 
 INSERT INTO LANGUAGE(name)
-SELECT lenguaje_pelicula 
-FROM TEMPORARY
-WHERE lenguaje_pelicula != '-'
-GROUP BY lenguaje_pelicula;
+    SELECT lenguaje_pelicula 
+        FROM TEMPORARY
+            WHERE lenguaje_pelicula != '-'
+                GROUP BY lenguaje_pelicula;
+
+select * from language;
 
 -- ==================================================================================================
 -- Inserting data to the ADDRESS table 
@@ -116,20 +118,27 @@ GROUP BY lenguaje_pelicula;
 -- Inserting data to the SHOP table 
 -- ==================================================================================================
 
-SELECT  nombre_tienda ,
-        encargado_tienda ,
-        direccion_tienda ,
-        codigo_postal_tienda ,
-        ciudad_tienda ,
-        pais_tienda 
-FROM TEMPORARY 
-WHERE nombre_tienda != '-'
-GROUP BY nombre_tienda ,
-         encargado_tienda ,
-         direccion_tienda ,
-         codigo_postal_tienda ,
-         ciudad_tienda ,
-         pais_tienda;
+INSERT INTO SHOP(name, address_id)    
+    SELECT  nombre_tienda, a.address_id
+        FROM TEMPORARY 
+            INNER JOIN ADDRESS a ON direccion_tienda = a.direction
+            INNER JOIN CITY c ON a.city_id = (SELECT city_id FROM CITY WHERE name = ciudad_tienda)
+                WHERE nombre_tienda != '-'
+                GROUP BY nombre_tienda, a.address_id;
+    
+-- Insertando direccion de la tienda
+INSERT INTO ADDRESS(direction, city_id)
+    SELECT nombre_tienda, direccion_tienda , c.city_id
+        FROM TEMPORARY 
+            INNER JOIN city c ON ciudad_tienda = c.name 
+            INNER JOIN country co ON c.country_id = co.country_id 
+                WHERE nombre_tienda != '-'
+                    GROUP BY    direccion_tienda ,
+                    nombre_tienda,
+                                ciudad_tienda ,
+                                pais_tienda,
+                                c.city_id;
+        
 
 -- ==================================================================================================
 -- Inserting data to the EMPLOYEE table 

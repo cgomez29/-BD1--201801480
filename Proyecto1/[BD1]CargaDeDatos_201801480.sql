@@ -112,50 +112,155 @@ select * from language;
 -- Inserting data to the ADDRESS table 
 -- ==================================================================================================
 
--- ????
+-- Shop address
+INSERT INTO ADDRESS(direction, city_id)
+    SELECT direccion_tienda , c.city_id
+        FROM TEMPORARY 
+            INNER JOIN city c ON ciudad_tienda = c.name 
+                WHERE nombre_tienda != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_empleado) 
+                    GROUP BY    direccion_tienda ,
+                                ciudad_tienda ,
+                                pais_tienda,
+                                c.city_id;
+
+-- Employee address
+INSERT INTO ADDRESS(direction, postal_code, city_id)
+    SELECT  direccion_empleado, 
+            (CASE WHEN codigo_postal_empleado = '-' THEN NULL ELSE codigo_postal_empleado END)AS CODE,
+            c.city_id
+        FROM TEMPORARY 
+            INNER JOIN CITY c ON ciudad_empleado = c.name 
+            WHERE nombre_empleado != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_empleado) 
+                GROUP BY    nombre_empleado,
+                            direccion_empleado ,
+                            codigo_postal_empleado ,
+                            ciudad_empleado ,
+                            pais_empleado,
+                            c.city_id;
+                            
+                            
+-- Customer address
+
+INSERT INTO ADDRESS(direction, postal_code, city_id)
+    SELECT  direccion_cliente, 
+            (CASE WHEN codigo_postal_cliente = '-' THEN NULL ELSE codigo_postal_cliente END)AS CODE,
+            c.city_id
+        FROM TEMPORARY 
+            INNER JOIN CITY c ON ciudad_cliente = c.name 
+            WHERE nombre_cliente != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_cliente) 
+                GROUP BY    nombre_cliente ,
+                            correo_cliente ,
+                            cliente_activo ,
+                            fecha_creacion ,
+                            tienda_preferida ,
+                            direccion_cliente ,
+                            codigo_postal_cliente ,
+                            ciudad_cliente ,
+                            pais_cliente,
+                            c.city_id;
 
 -- ==================================================================================================
 -- Inserting data to the SHOP table 
 -- ==================================================================================================
 
-INSERT INTO SHOP(name, address_id)    
-    SELECT  nombre_tienda, a.address_id
+INSERT INTO SHOP(address_id)    
+    SELECT a.address_id
         FROM TEMPORARY 
             INNER JOIN ADDRESS a ON direccion_tienda = a.direction
             INNER JOIN CITY c ON a.city_id = (SELECT city_id FROM CITY WHERE name = ciudad_tienda)
                 WHERE nombre_tienda != '-'
                 GROUP BY nombre_tienda, a.address_id;
     
--- Insertando direccion de la tienda
-INSERT INTO ADDRESS(direction, city_id)
-    SELECT nombre_tienda, direccion_tienda , c.city_id
-        FROM TEMPORARY 
-            INNER JOIN city c ON ciudad_tienda = c.name 
-            INNER JOIN country co ON c.country_id = co.country_id 
-                WHERE nombre_tienda != '-'
-                    GROUP BY    direccion_tienda ,
-                    nombre_tienda,
-                                ciudad_tienda ,
-                                pais_tienda,
-                                c.city_id;
-        
-
 -- ==================================================================================================
 -- Inserting data to the EMPLOYEE table 
 -- ==================================================================================================
-
-
+                    
+INSERT INTO EMPLOYEE(name, surname, email, active, username, password, shop_id, address_id)                                            
+    SELECT  SUBSTR(nombre_empleado, 1, INSTR(nombre_empleado, ' ')-1) as name,
+            SUBSTR(nombre_empleado, INSTR(nombre_empleado, ' ')+1) as surname,
+            correo_empleado,
+            empleado_activo,
+            usuario_empleado,
+            password_empleado,
+            s.shop_id,
+            a.address_id
+        FROM TEMPORARY
+            INNER JOIN ADDRESS a ON direccion_empleado = a.direction
+            INNER JOIN CITY c ON c.city_id = (SELECT city_id FROM CITY WHERE name = ciudad_empleado)
+            INNER JOIN SHOP s ON s.address_id = (SELECT sh.shop_id FROM SHOP sh INNER JOIN ADDRESS ad ON sh.address_id = ad.address_id WHERE ad.direction = direccion_tienda)
+            WHERE   nombre_empleado != '-' 
+            GROUP BY    nombre_empleado ,
+                        correo_empleado ,
+                        empleado_activo ,
+                        tienda_empleado ,
+                        usuario_empleado ,
+                        password_empleado ,
+                        direccion_empleado ,
+                        codigo_postal_empleado ,
+                        ciudad_empleado ,
+                        pais_empleado,
+                        s.shop_id,
+                        a.address_id;
+                    
 -- ==================================================================================================
 -- Inserting data to the REWARD table 
 -- ==================================================================================================
 
-
+INSERT INTO REWARD(amount_to_pay, pay_date, employee_id) 
+SELECT  monto_a_pagar,
+        (TO_TIMESTAMP(fecha_pago, 'DD-MM-YYYY HH24:MI')),
+        e.employee_id
+    FROM TEMPORARY
+        INNER JOIN EMPLOYEE e ON e.username = usuario_empleado AND e.email = correo_empleado
+        WHERE nombre_empleado != '-'
+        GROUP BY    direccion_cliente ,
+                    nombre_empleado ,
+                    correo_empleado ,
+                    empleado_activo ,
+                    tienda_empleado ,
+                    usuario_empleado ,
+                    fecha_renta , 
+                    fecha_retorno , 
+                    monto_a_pagar ,
+                    fecha_pago,
+                    e.employee_id;
 
 -- ==================================================================================================
 -- Inserting data to the CUSTOMER table 
 -- ==================================================================================================
 
-
+INSERT INTO CUSTOMER(name, surname, email, registration_date, active, shop_id, address_id)
+SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,
+        SUBSTR(t.nombre_cliente, INSTR(t.nombre_cliente, ' ')+1) as surname,
+        t.correo_cliente ,
+        (TO_TIMESTAMP(t.fecha_creacion, 'DD/MM/YYYY')),
+        t.cliente_activo,
+        s.shop_id,
+        a.address_id 
+    FROM TEMPORARY t
+        INNER JOIN ADDRESS a ON t.direccion_cliente = a.direction AND t.codigo_postal_cliente = a.postal_code
+        INNER JOIN SHOP s ON s.address_id = (
+            SELECT sh.shop_id FROM SHOP sh WHERE address_id = (
+                SELECT ad.address_id
+                    FROM TEMPORARY temp
+                        INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
+                            WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t.tienda_preferida
+                            GROUP BY temp.nombre_tienda, ad.address_id
+            )
+        ) 
+        WHERE nombre_cliente != '-' 
+        GROUP BY    t.nombre_cliente ,
+                    t.correo_cliente ,
+                    t.cliente_activo ,
+                    t.fecha_creacion ,
+                    t.tienda_preferida,
+                    t.direccion_cliente ,
+                    t.codigo_postal_cliente ,
+                    t.ciudad_cliente ,
+                    t.pais_cliente,
+                    s.shop_id,
+                    a.address_id;
+                   
 -- ==================================================================================================
 -- Inserting data to the RENTAL_MOVIE table 
 -- ==================================================================================================
@@ -165,14 +270,21 @@ INSERT INTO ADDRESS(direction, city_id)
 -- Inserting data to the MOVIE table 
 -- ==================================================================================================
 
-SELECT nombre_pelicula, descripcion_pelicula, ano_lanzamiento,
-duracion, dias_renta, costo_renta, costo_por_dano, clasificacion,
-lenguaje_pelicula, categoria_pelicula 
+SELECT  nombre_pelicula,
+        descripcion_pelicula,
+        ano_lanzamiento,
+        duracion,
+        dias_renta,
+        costo_renta,
+        costo_por_dano,
+        clasificacion,
+        lenguaje_pelicula,
+        categoria_pelicula 
 FROM TEMPORARY
-WHERE nombre_pelicula != '-'
-GROUP BY nombre_pelicula, descripcion_pelicula, ano_lanzamiento,
-duracion, dias_renta, costo_renta, costo_por_dano, clasificacion,
-lenguaje_pelicula, categoria_pelicula ;
+    WHERE nombre_pelicula != '-'
+        GROUP BY    nombre_pelicula, descripcion_pelicula, ano_lanzamiento,
+                    duracion, dias_renta, costo_renta, costo_por_dano, clasificacion,
+                    lenguaje_pelicula, categoria_pelicula ;
 
 
 -- ==================================================================================================
@@ -210,3 +322,5 @@ GROUP BY tienda_pelicula, nombre_pelicula, lenguaje_pelicula, descripcion_pelicu
 -- ==================================================================================================
 
 
+
+-- alter session set nls_date_format = 'DD/MM/YYYY HH24:MI:SS'

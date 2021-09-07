@@ -97,6 +97,15 @@ INSERT INTO CATEGORY(name)
                 GROUP BY categoria_pelicula;
 
 -- ==================================================================================================
+-- Inserting data to the CLASIFICATION table 
+-- ==================================================================================================
+
+INSERT INTO CLASSIFICATION(name)
+    SELECT DISTINCT(clasificacion) 
+        FROM TEMPORARY 
+            WHERE clasificacion != '-';
+
+-- ==================================================================================================
 -- Inserting data to the LANGUAGE table 
 -- ==================================================================================================
 
@@ -229,6 +238,29 @@ SELECT  monto_a_pagar,
 -- Inserting data to the CUSTOMER table 
 -- ==================================================================================================
 
+select nombre_cliente ,
+    correo_cliente ,
+    cliente_activo ,
+    fecha_creacion ,
+    tienda_preferida ,
+    direccion_cliente ,
+    codigo_postal_cliente ,
+    ciudad_cliente ,
+    pais_cliente 
+from temporary
+where nombre_cliente != '-'
+group by nombre_cliente ,
+    correo_cliente ,
+    cliente_activo ,
+    fecha_creacion ,
+    tienda_preferida ,
+    direccion_cliente ,
+    codigo_postal_cliente ,
+    ciudad_cliente ,
+    pais_cliente;
+
+
+
 INSERT INTO CUSTOMER(name, surname, email, registration_date, active, shop_id, address_id)
 SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,
         SUBSTR(t.nombre_cliente, INSTR(t.nombre_cliente, ' ')+1) as surname,
@@ -260,31 +292,46 @@ SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,
                     t.pais_cliente,
                     s.shop_id,
                     a.address_id;
-                   
--- ==================================================================================================
--- Inserting data to the RENTAL_MOVIE table 
--- ==================================================================================================
-
 
 -- ==================================================================================================
 -- Inserting data to the MOVIE table 
 -- ==================================================================================================
 
-SELECT  nombre_pelicula,
-        descripcion_pelicula,
-        ano_lanzamiento,
-        duracion,
-        dias_renta,
-        costo_renta,
-        costo_por_dano,
-        clasificacion,
-        lenguaje_pelicula,
-        categoria_pelicula 
-FROM TEMPORARY
-    WHERE nombre_pelicula != '-'
-        GROUP BY    nombre_pelicula, descripcion_pelicula, ano_lanzamiento,
-                    duracion, dias_renta, costo_renta, costo_por_dano, clasificacion,
-                    lenguaje_pelicula, categoria_pelicula ;
+INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost, damage_cost, native_language, classification_id, category_id)
+    SELECT  nombre_pelicula,
+            descripcion_pelicula,
+            ano_lanzamiento,
+            duracion,
+            dias_renta,
+            costo_renta,
+            costo_por_dano,
+            l.language_id,
+            c.classification_id,
+            ca.category_id
+    FROM TEMPORARY
+        INNER JOIN CLASSIFICATION c ON  clasificacion = c.name 
+        INNER JOIN CATEGORY ca ON  categoria_pelicula = ca.name 
+        INNER JOIN LANGUAGE l ON lenguaje_pelicula = l.name
+            WHERE nombre_pelicula != '-'
+                GROUP BY    nombre_pelicula,
+                            descripcion_pelicula,
+                            ano_lanzamiento,
+                            duracion,
+                            dias_renta,
+                            costo_renta,
+                            costo_por_dano,
+                            clasificacion,
+                            lenguaje_pelicula,
+                            categoria_pelicula,
+                            l.language_id,
+                            c.classification_id,
+                            ca.category_id;
+
+                   
+-- ==================================================================================================
+-- Inserting data to the RENTAL_MOVIE table 
+-- ==================================================================================================
+
 
 
 -- ==================================================================================================
@@ -292,9 +339,9 @@ FROM TEMPORARY
 -- ==================================================================================================
 
 SELECT nombre_pelicula, actor_pelicula, descripcion_pelicula, ano_lanzamiento
-FROM TEMPORARY 
-WHERE nombre_pelicula != '-' and actor_pelicula != '-'
-GROUP BY nombre_pelicula, descripcion_pelicula, ano_lanzamiento, actor_pelicula;
+    FROM TEMPORARY 
+        WHERE nombre_pelicula != '-' and actor_pelicula != '-'
+            GROUP BY nombre_pelicula, descripcion_pelicula, ano_lanzamiento, actor_pelicula;
 
 -- ==================================================================================================
 -- Inserting data to the MOVIE_LANGUAGE table 

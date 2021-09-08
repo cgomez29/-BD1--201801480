@@ -4,8 +4,13 @@
 
 -- =================================================================================================================
 --   1. Mostrar la cantidad de copias que existen en el inventario para la película
---      “Sugar Wonka”.
+--      “Sugar Wonka�?.
 -- =================================================================================================================
+
+SELECT i.stock 
+    FROM INVENTORY i
+        INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+            WHERE m.title = 'SUGAR WONKA';
 
 -- =================================================================================================================
 --   2. Mostrar el nombre, apellido y pago total de todos los clientes que han rentado
@@ -20,7 +25,7 @@
 
 -- =================================================================================================================
 --   4. Mostrar el nombre y apellido (en una sola columna) de los actores que
---      contienen la palabra “SON” en su apellido, ordenados por su primer nombre
+--      contienen la palabra “SON�? en su apellido, ordenados por su primer nombre
 -- =================================================================================================================
 
 -- =================================================================================================================
@@ -31,7 +36,7 @@
 
 -- =================================================================================================================
 --    6. Mostrar el nombre y apellido de los actores que participaron en una película
---       que involucra un “Cocodrilo” y un “Tiburón” junto con el año de lanzamiento
+--       que involucra un “Cocodrilo�? y un “Tiburón�? junto con el año de lanzamiento
 --       de la película, ordenados por el apellido del actor en forma ascendente.
 -- =================================================================================================================
 
@@ -82,7 +87,7 @@
 
 -- =================================================================================================================
 --   14. Mostrar todas las ciudades por país en las que predomina la renta de
---       películas de la categoría “Horror”. Es decir, hay más rentas que las otras
+--       películas de la categoría “Horror�?. Es decir, hay más rentas que las otras
 --       categorías
 -- =================================================================================================================
 
@@ -94,13 +99,13 @@
 
 -- =================================================================================================================
 --   16. Mostrar el nombre del país y el porcentaje de rentas de películas de la
---       categoría “Sports”.
+--       categoría “Sports�?.
 -- =================================================================================================================
 
 -- =================================================================================================================
 --   17. Mostrar la lista de ciudades de Estados Unidos y el número de rentas de
 --       películas para las ciudades que obtuvieron más rentas que la ciudad
---       “Dayton”.
+--       “Dayton�?.
 -- =================================================================================================================
 
 -- =================================================================================================================

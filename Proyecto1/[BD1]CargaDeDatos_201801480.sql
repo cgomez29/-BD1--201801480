@@ -216,49 +216,34 @@ INSERT INTO EMPLOYEE(name, surname, email, active, username, password, shop_id, 
 -- ==================================================================================================
 
 INSERT INTO REWARD(amount_to_pay, pay_date, employee_id) 
-SELECT  monto_a_pagar,
-        (TO_TIMESTAMP(fecha_pago, 'DD-MM-YYYY HH24:MI')),
-        e.employee_id
-    FROM TEMPORARY
-        INNER JOIN EMPLOYEE e ON e.username = usuario_empleado AND e.email = correo_empleado
-        WHERE nombre_empleado != '-'
-        GROUP BY    direccion_cliente ,
-                    nombre_empleado ,
-                    correo_empleado ,
-                    empleado_activo ,
-                    tienda_empleado ,
-                    usuario_empleado ,
-                    fecha_renta , 
-                    fecha_retorno , 
-                    monto_a_pagar ,
-                    fecha_pago,
-                    e.employee_id;
+    SELECT  monto_a_pagar,
+            (TO_TIMESTAMP(fecha_pago, 'DD-MM-YYYY HH24:MI')),
+            e.employee_id
+        FROM TEMPORARY
+            INNER JOIN EMPLOYEE e ON e.username = usuario_empleado AND e.email = correo_empleado
+            WHERE   nombre_empleado != '-' AND nombre_cliente != '-' AND
+                    fecha_renta != '-' AND fecha_retorno != '-'
+            GROUP BY    direccion_cliente ,
+                        nombre_empleado,
+                        correo_empleado,
+                        empleado_activo,
+                        tienda_empleado,
+                        usuario_empleado,
+                        fecha_renta, 
+                        fecha_retorno, 
+                        monto_a_pagar,
+                        nombre_cliente,
+                        correo_cliente,
+                        nombre_pelicula,
+                        fecha_pago,
+                        e.employee_id;
 
 -- ==================================================================================================
 -- Inserting data to the CUSTOMER table 
 -- ==================================================================================================
 
-select nombre_cliente ,
-    correo_cliente ,
-    cliente_activo ,
-    fecha_creacion ,
-    tienda_preferida ,
-    direccion_cliente ,
-    codigo_postal_cliente ,
-    ciudad_cliente ,
-    pais_cliente 
-from temporary
-where nombre_cliente != '-'
-group by nombre_cliente ,
-    correo_cliente ,
-    cliente_activo ,
-    fecha_creacion ,
-    tienda_preferida ,
-    direccion_cliente ,
-    codigo_postal_cliente ,
-    ciudad_cliente ,
-    pais_cliente;
 
+select * from temporary where codigo_postal_cliente = '-';
 
 
 INSERT INTO CUSTOMER(name, surname, email, registration_date, active, shop_id, address_id)
@@ -272,14 +257,14 @@ SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,
     FROM TEMPORARY t
         INNER JOIN ADDRESS a ON t.direccion_cliente = a.direction AND t.codigo_postal_cliente = a.postal_code
         INNER JOIN SHOP s ON s.address_id = (
-            SELECT sh.shop_id FROM SHOP sh WHERE address_id = (
-                SELECT ad.address_id
-                    FROM TEMPORARY temp
-                        INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
-                            WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t.tienda_preferida
-                            GROUP BY temp.nombre_tienda, ad.address_id
-            )
-        ) 
+                SELECT sh.shop_id FROM SHOP sh WHERE address_id = (
+                    SELECT ad.address_id
+                        FROM TEMPORARY temp
+                            INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
+                                WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t.tienda_preferida
+                                GROUP BY temp.nombre_tienda, ad.address_id
+                )
+            ) 
         WHERE nombre_cliente != '-' 
         GROUP BY    t.nombre_cliente ,
                     t.correo_cliente ,
@@ -327,47 +312,115 @@ INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost,
                             c.classification_id,
                             ca.category_id;
 
-                   
+-- ==================================================================================================
+-- Inserting data to the INVENTORY table 
+-- ==================================================================================================
+
+INSERT INTO INVENTORY(stock, movie_id, shop_id)
+    SELECT  COUNT(t1.nombre_pelicula) Stock,
+            m.movie_id,
+            s.shop_id
+        FROM TEMPORARY t1
+            INNER JOIN MOVIE m ON t1.nombre_pelicula = m.title
+            INNER JOIN SHOP s ON s.shop_id = (
+                SELECT sh.shop_id FROM SHOP sh WHERE address_id = (
+                    SELECT ad.address_id
+                        FROM TEMPORARY temp
+                            INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
+                                WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_pelicula
+                                GROUP BY temp.nombre_tienda, ad.address_id
+                    )
+                )
+                WHERE t1.nombre_pelicula != '-' and t1.tienda_pelicula != '-'
+                    GROUP BY    t1.tienda_pelicula,
+                                t1.nombre_pelicula,
+                                t1.descripcion_pelicula,
+                                t1.ano_lanzamiento,
+                                m.movie_id,
+                                s.shop_id;
+
+
 -- ==================================================================================================
 -- Inserting data to the RENTAL_MOVIE table 
 -- ==================================================================================================
 
+INSERT INTO RENTAL_MOVIE (rental_date, return_date, inventory_id, customer_id)
+    SELECT  (TO_TIMESTAMP(t1.fecha_renta, 'DD-MM-YYYY HH24:MI')), 
+            (TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI')),
+            i.inventory_id,
+            c.customer_id
+        FROM TEMPORARY t1
+            INNER JOIN MOVIE m ON t1.nombre_pelicula = m.title 
+            INNER JOIN INVENTORY i ON i.movie_id = m.movie_id AND i.shop_id = (
+                SELECT sh.shop_id FROM SHOP sh WHERE sh.address_id = (
+                        SELECT ad.address_id
+                            FROM TEMPORARY temp
+                                INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
+                                    WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_empleado
+                                    GROUP BY temp.nombre_tienda, ad.address_id
+                        )
+            )
+            INNER JOIN CUSTOMER c ON t1.correo_cliente = c.email 
+                WHERE t1.nombre_cliente != '-' AND nombre_empleado != '-' AND 
+                      t1.fecha_renta != '-' AND t1.fecha_retorno != '-'
+                    GROUP BY    t1.direccion_cliente ,
+                                t1.nombre_empleado,
+                                t1.correo_empleado,
+                                t1.empleado_activo,
+                                t1.tienda_empleado,
+                                t1.usuario_empleado,
+                                t1.fecha_renta, 
+                                t1.fecha_retorno, 
+                                t1.monto_a_pagar,
+                                t1.nombre_cliente,
+                                t1.correo_cliente,
+                                t1.nombre_pelicula,
+                                t1.fecha_pago,
+                                i.inventory_id,
+                                c.customer_id;
 
-
+    
 -- ==================================================================================================
 -- Inserting data to the MOVIE_ACTOR table 
 -- ==================================================================================================
 
-SELECT nombre_pelicula, actor_pelicula, descripcion_pelicula, ano_lanzamiento
-    FROM TEMPORARY 
-        WHERE nombre_pelicula != '-' and actor_pelicula != '-'
-            GROUP BY nombre_pelicula, descripcion_pelicula, ano_lanzamiento, actor_pelicula;
+INSERT INTO MOVIE_ACTOR(movie_id, actor_id)
+    SELECT  m.movie_id,
+            a.actor_id
+        FROM TEMPORARY 
+            INNER JOIN ACTOR a ON actor_pelicula = CONCAT(CONCAT(name, ' '), surname)
+            INNER JOIN MOVIE m ON nombre_pelicula = m.title
+                WHERE nombre_pelicula != '-' and actor_pelicula != '-'
+                    GROUP BY    nombre_pelicula,
+                                actor_pelicula,
+                                descripcion_pelicula,
+                                ano_lanzamiento,
+                                a.actor_id,
+                                m.movie_id;
 
 -- ==================================================================================================
 -- Inserting data to the MOVIE_LANGUAGE table 
 -- ==================================================================================================
 
-SELECT nombre_pelicula, lenguaje_pelicula, descripcion_pelicula, ano_lanzamiento
-FROM TEMPORARY 
-WHERE nombre_pelicula != '-' and actor_pelicula != '-'
-GROUP BY nombre_pelicula, descripcion_pelicula, ano_lanzamiento, lenguaje_pelicula;
-
-
--- ==================================================================================================
--- Inserting data to the INVENTORY table 
--- ==================================================================================================
-
--- tienda_pelicula ubicacion de la pelicula
-SELECT COUNT(nombre_pelicula), tienda_pelicula, nombre_pelicula, lenguaje_pelicula, descripcion_pelicula, ano_lanzamiento
-FROM TEMPORARY 
-WHERE nombre_pelicula != '-' and tienda_pelicula != '-'
-GROUP BY tienda_pelicula, nombre_pelicula, lenguaje_pelicula, descripcion_pelicula, ano_lanzamiento;
-
+INSERT INTO MOVIE_LANGUAGE(movie_id, language_id)
+    SELECT  m.movie_id,
+            l.language_id
+        FROM TEMPORARY 
+            INNER JOIN LANGUAGE l ON lenguaje_pelicula = l.name
+            INNER JOIN MOVIE m ON nombre_pelicula = m.title
+            WHERE nombre_pelicula != '-'
+                GROUP BY    nombre_pelicula,
+                            descripcion_pelicula,
+                            ano_lanzamiento,
+                            lenguaje_pelicula,
+                            m.movie_id,
+                            l.language_id;
 
 -- ==================================================================================================
--- Inserting data to the INVENTORY_TABLE table 
+-- Inserting data to the SHOP_INVENTORY table 
 -- ==================================================================================================
 
+-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
 
 
 -- alter session set nls_date_format = 'DD/MM/YYYY HH24:MI:SS'

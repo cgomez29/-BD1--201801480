@@ -122,8 +122,10 @@ select * from language;
 -- ==================================================================================================
 
 -- Shop address
-INSERT INTO ADDRESS(direction, city_id)
-    SELECT direccion_tienda , c.city_id
+INSERT INTO ADDRESS(direction, postal_code, city_id)
+    SELECT  direccion_tienda,
+            (CASE WHEN codigo_postal_tienda = '-' THEN NULL ELSE codigo_postal_tienda END)AS CODE,
+            c.city_id
         FROM TEMPORARY 
             INNER JOIN city c ON ciudad_tienda = c.name 
                 WHERE nombre_tienda != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_empleado) 
@@ -152,7 +154,7 @@ INSERT INTO ADDRESS(direction, postal_code, city_id)
 
 INSERT INTO ADDRESS(direction, postal_code, city_id)
     SELECT  direccion_cliente, 
-            (CASE WHEN codigo_postal_cliente = '-' THEN NULL ELSE codigo_postal_cliente END)AS CODE,
+            (CASE WHEN codigo_postal_cliente = '-' THEN NULL ELSE codigo_postal_cliente END) AS CODE,
             c.city_id
         FROM TEMPORARY 
             INNER JOIN CITY c ON ciudad_cliente = c.name 
@@ -210,41 +212,10 @@ INSERT INTO EMPLOYEE(name, surname, email, active, username, password, shop_id, 
                         pais_empleado,
                         s.shop_id,
                         a.address_id;
-                    
--- ==================================================================================================
--- Inserting data to the REWARD table 
--- ==================================================================================================
-
-INSERT INTO REWARD(amount_to_pay, pay_date, employee_id) 
-    SELECT  monto_a_pagar,
-            (TO_TIMESTAMP(fecha_pago, 'DD-MM-YYYY HH24:MI')),
-            e.employee_id
-        FROM TEMPORARY
-            INNER JOIN EMPLOYEE e ON e.username = usuario_empleado AND e.email = correo_empleado
-            WHERE   nombre_empleado != '-' AND nombre_cliente != '-' AND
-                    fecha_renta != '-' AND fecha_retorno != '-'
-            GROUP BY    direccion_cliente ,
-                        nombre_empleado,
-                        correo_empleado,
-                        empleado_activo,
-                        tienda_empleado,
-                        usuario_empleado,
-                        fecha_renta, 
-                        fecha_retorno, 
-                        monto_a_pagar,
-                        nombre_cliente,
-                        correo_cliente,
-                        nombre_pelicula,
-                        fecha_pago,
-                        e.employee_id;
 
 -- ==================================================================================================
 -- Inserting data to the CUSTOMER table 
 -- ==================================================================================================
-
-
-select * from temporary where codigo_postal_cliente = '-';
-
 
 INSERT INTO CUSTOMER(name, surname, email, registration_date, active, shop_id, address_id)
 SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,
@@ -344,9 +315,14 @@ INSERT INTO INVENTORY(stock, movie_id, shop_id)
 -- Inserting data to the RENTAL_MOVIE table 
 -- ==================================================================================================
 
-INSERT INTO RENTAL_MOVIE (rental_date, return_date, inventory_id, customer_id)
+
+-- INSERT INTO RENTAL_MOVIE (rental_date, return_date,   inventory_id, customer_id)
+
+select count(*) from (
     SELECT  (TO_TIMESTAMP(t1.fecha_renta, 'DD-MM-YYYY HH24:MI')), 
-            (TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI')),
+            (CASE WHEN t1.fecha_retorno = '-' THEN NULL ELSE TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI') END),
+             t1.monto_a_pagar,
+            (TO_TIMESTAMP(t1.fecha_pago, 'DD-MM-YYYY HH24:MI')),
             i.inventory_id,
             c.customer_id
         FROM TEMPORARY t1
@@ -361,23 +337,14 @@ INSERT INTO RENTAL_MOVIE (rental_date, return_date, inventory_id, customer_id)
                         )
             )
             INNER JOIN CUSTOMER c ON t1.correo_cliente = c.email 
-                WHERE t1.nombre_cliente != '-' AND nombre_empleado != '-' AND 
-                      t1.fecha_renta != '-' AND t1.fecha_retorno != '-'
-                    GROUP BY    t1.direccion_cliente ,
-                                t1.nombre_empleado,
-                                t1.correo_empleado,
-                                t1.empleado_activo,
-                                t1.tienda_empleado,
-                                t1.usuario_empleado,
+                    GROUP BY    
                                 t1.fecha_renta, 
                                 t1.fecha_retorno, 
+                                t1.fecha_pago,
                                 t1.monto_a_pagar,
-                                t1.nombre_cliente,
-                                t1.correo_cliente,
-                                t1.nombre_pelicula,
                                 t1.fecha_pago,
                                 i.inventory_id,
-                                c.customer_id;
+                                c.customer_id);
 
     
 -- ==================================================================================================

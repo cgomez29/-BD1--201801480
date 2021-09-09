@@ -79,12 +79,19 @@ SELECT  COUNT(a.surname),
 
 -- =================================================================================================================
 --    6. Mostrar el nombre y apellido de los actores que participaron en una pelicula
---       que involucra un 'Cocodrilo' y un 'Tiburon' junto con el año de lanzamiento
+--       que involucra un 'Cocodrilo' y un 'Tiburon' junto con el a�o de lanzamiento
 --       de la pelicula, ordenados por el apellido del actor en forma ascendente.
 -- =================================================================================================================
 
-
-
+SELECT  a.name,
+        a.surname,
+        m.release_year,
+        m.description
+    FROM MOVIE_ACTOR ma 
+        INNER JOIN MOVIE m ON ma.movie_id = m.movie_id
+        INNER JOIN ACTOR a ON ma.actor_id = a.actor_id
+            WHERE m.description LIKE('%Crocodile%') AND m.description LIKE('%Tiburon%')
+                ORDER BY a.surname ASC;
 
 
 -- =================================================================================================================
@@ -93,17 +100,52 @@ SELECT  COUNT(a.surname),
 --      Ordenar el resultado por numero de peliculas de forma descendente.
 -- =================================================================================================================
 
+SELECT name, cantidad FROM (
+    SELECT  c.name,
+            COUNT(m.movie_id) AS cantidad 
+        FROM MOVIE m 
+            INNER JOIN CATEGORY c ON m.category_id = c.category_id 
+                GROUP BY c.name
+) WHERE cantidad >= 55 AND cantidad <=65;
+            
 -- =================================================================================================================
 --   8. Mostrar todas las categorias de peliculas en las que la diferencia promedio
 --      entre el costo de reemplazo de la pelicula y el precio de alquiler sea superior
 --      a 17.
 -- =================================================================================================================
 
+SELECT name FROM (
+    SELECT  c.name,
+            COUNT(m.movie_id) AS cantidad,
+            SUM(damage_cost) AS remplazo,
+            SUM(rental_cost) AS alquiler
+        FROM MOVIE m
+            INNER JOIN CATEGORY c ON m.category_id = c.category_id 
+                GROUP BY    c.name
+) WHERE ((remplazo - alquiler)/cantidad) > 17;
+
 -- =================================================================================================================
 --    9. Mostrar el titulo de la pelicula, el nombre y apellido del actor de todas
 --       aquellas peliculas en las que uno o mas actores actuaron en dos o mas
 --       peliculas.
 -- =================================================================================================================
+
+
+--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+SELECT  m.title,
+        a.name,
+        a.surname
+    FROM MOVIE m, ACTOR a 
+        WHERE a.actor_id IN (
+            SELECT actor_id FROM (
+                SELECT  ma.actor_id,
+                        COUNT(ma.movie_id) AS actuo
+                    FROM MOVIE_ACTOR ma 
+                            GROUP BY ma.actor_id
+            ) WHERE actuo >= 2
+        );
+--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        
 
 -- =================================================================================================================
 --    10.Mostrar el nombre y apellido (en una sola columna) de todos los actores y

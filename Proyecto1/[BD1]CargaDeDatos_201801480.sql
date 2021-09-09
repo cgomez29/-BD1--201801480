@@ -284,6 +284,42 @@ INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost,
                             ca.category_id;
 
 -- ==================================================================================================
+-- Inserting data to the MOVIE_ACTOR table 
+-- ==================================================================================================
+
+INSERT INTO MOVIE_ACTOR(movie_id, actor_id)
+    SELECT  m.movie_id,
+            a.actor_id
+        FROM TEMPORARY 
+            INNER JOIN ACTOR a ON actor_pelicula = CONCAT(CONCAT(name, ' '), surname)
+            INNER JOIN MOVIE m ON nombre_pelicula = m.title
+                WHERE nombre_pelicula != '-' and actor_pelicula != '-'
+                    GROUP BY    nombre_pelicula,
+                                actor_pelicula,
+                                descripcion_pelicula,
+                                ano_lanzamiento,
+                                a.actor_id,
+                                m.movie_id;
+
+-- ==================================================================================================
+-- Inserting data to the MOVIE_LANGUAGE table 
+-- ==================================================================================================
+
+INSERT INTO MOVIE_LANGUAGE(movie_id, language_id)
+    SELECT  m.movie_id,
+            l.language_id
+        FROM TEMPORARY 
+            INNER JOIN LANGUAGE l ON lenguaje_pelicula = l.name
+            INNER JOIN MOVIE m ON nombre_pelicula = m.title
+            WHERE nombre_pelicula != '-'
+                GROUP BY    nombre_pelicula,
+                            descripcion_pelicula,
+                            ano_lanzamiento,
+                            lenguaje_pelicula,
+                            m.movie_id,
+                            l.language_id;
+
+-- ==================================================================================================
 -- Inserting data to the INVENTORY table 
 -- ==================================================================================================
 
@@ -347,42 +383,6 @@ INSERT INTO RENTAL_MOVIE (rental_date, return_date, amount_to_pay, pay_date, emp
                                 e.employee_id,
                                 i.inventory_id,
                                 c.customer_id;
-
--- ==================================================================================================
--- Inserting data to the MOVIE_ACTOR table 
--- ==================================================================================================
-
-INSERT INTO MOVIE_ACTOR(movie_id, actor_id)
-    SELECT  m.movie_id,
-            a.actor_id
-        FROM TEMPORARY 
-            INNER JOIN ACTOR a ON actor_pelicula = CONCAT(CONCAT(name, ' '), surname)
-            INNER JOIN MOVIE m ON nombre_pelicula = m.title
-                WHERE nombre_pelicula != '-' and actor_pelicula != '-'
-                    GROUP BY    nombre_pelicula,
-                                actor_pelicula,
-                                descripcion_pelicula,
-                                ano_lanzamiento,
-                                a.actor_id,
-                                m.movie_id;
-
--- ==================================================================================================
--- Inserting data to the MOVIE_LANGUAGE table 
--- ==================================================================================================
-
-INSERT INTO MOVIE_LANGUAGE(movie_id, language_id)
-    SELECT  m.movie_id,
-            l.language_id
-        FROM TEMPORARY 
-            INNER JOIN LANGUAGE l ON lenguaje_pelicula = l.name
-            INNER JOIN MOVIE m ON nombre_pelicula = m.title
-            WHERE nombre_pelicula != '-'
-                GROUP BY    nombre_pelicula,
-                            descripcion_pelicula,
-                            ano_lanzamiento,
-                            lenguaje_pelicula,
-                            m.movie_id,
-                            l.language_id;
 
 -- ==================================================================================================
 -- Inserting data to the SHOP_INVENTORY table 

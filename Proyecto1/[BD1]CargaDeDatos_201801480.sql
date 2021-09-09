@@ -316,37 +316,38 @@ INSERT INTO INVENTORY(stock, movie_id, shop_id)
 -- ==================================================================================================
 
 
--- INSERT INTO RENTAL_MOVIE (rental_date, return_date,   inventory_id, customer_id)
-
-select count(*) from (
+INSERT INTO RENTAL_MOVIE (rental_date, return_date, amount_to_pay, pay_date, employee_id, inventory_id, customer_id)
     SELECT  (TO_TIMESTAMP(t1.fecha_renta, 'DD-MM-YYYY HH24:MI')), 
-            (CASE WHEN t1.fecha_retorno = '-' THEN NULL ELSE TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI') END),
+            (CASE WHEN t1.fecha_retorno = '-' THEN NULL ELSE TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI') END) AS ReturnDate,
              t1.monto_a_pagar,
             (TO_TIMESTAMP(t1.fecha_pago, 'DD-MM-YYYY HH24:MI')),
+            e.employee_id,
             i.inventory_id,
             c.customer_id
         FROM TEMPORARY t1
             INNER JOIN MOVIE m ON t1.nombre_pelicula = m.title 
-            INNER JOIN INVENTORY i ON i.movie_id = m.movie_id AND i.shop_id = (
-                SELECT sh.shop_id FROM SHOP sh WHERE sh.address_id = (
+            INNER JOIN INVENTORY i ON m.movie_id = i.movie_id
+            INNER JOIN EMPLOYEE e ON i.shop_id = e.shop_id
+            INNER JOIN CUSTOMER c ON t1.correo_cliente = c.email 
+                WHERE i.shop_id = (
+                    SELECT sh.shop_id FROM SHOP sh WHERE sh.address_id = (
                         SELECT ad.address_id
                             FROM TEMPORARY temp
                                 INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
-                                    WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_empleado
+                                    WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_preferida
                                     GROUP BY temp.nombre_tienda, ad.address_id
                         )
-            )
-            INNER JOIN CUSTOMER c ON t1.correo_cliente = c.email 
+                )
                     GROUP BY    
                                 t1.fecha_renta, 
                                 t1.fecha_retorno, 
                                 t1.fecha_pago,
                                 t1.monto_a_pagar,
                                 t1.fecha_pago,
+                                e.employee_id,
                                 i.inventory_id,
-                                c.customer_id);
+                                c.customer_id;
 
-    
 -- ==================================================================================================
 -- Inserting data to the MOVIE_ACTOR table 
 -- ==================================================================================================

@@ -161,6 +161,15 @@ SELECT  m.title,
 --       respecto al resto de clientes del pais
 -- =================================================================================================================
 
+SELECT  co.name AS pais,
+        cu.name AS nombre
+    FROM RENTAL_MOVIE r
+        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
+        INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
+        INNER JOIN CITY ci ON a.city_id = ci.city_id
+        INNER JOIN COUNTRY co ON ci.country_id = co.country_id; 
+        
+
 -- =================================================================================================================
 --    12.Mostrar el total de clientes y porcentaje de clientes mujeres por ciudad y pais.
 --       El ciento por ciento es el total de mujeres por pais. (Tip: Todos los
@@ -174,11 +183,44 @@ SELECT  m.title,
 --       representa el maximo
 -- =================================================================================================================
 
+
+
+SELECT cantidad, pais, name FROM ( 
+    SELECT  COUNT(cu.customer_id) cantidad,
+            co.name AS pais,
+            cu.name AS name
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                    GROUP BY    co.name,
+                                cu.customer_id,
+                                cu.name
+                        ORDER BY    co.name,
+                                    cantidad DESC
+)   WHERE cantidad = (
+        SELECT  COUNT(cu2.customer_id) cantidad2
+            FROM RENTAL_MOVIE r2
+                INNER JOIN CUSTOMER cu2 ON r2.customer_id = cu2.customer_id
+                INNER JOIN ADDRESS a2 ON cu2.address_id = a2.address_id 
+                INNER JOIN CITY ci2 ON a2.city_id = ci2.city_id 
+                INNER JOIN COUNTRY co2 ON ci2.country_id = co2.country_id
+                    WHERE co2.name = pais
+                        GROUP BY    co2.name,
+                                    cu2.customer_id
+                            ORDER BY    co2.name,
+                                        cantidad2 DESC FETCH FIRST 1 ROWS ONLY    
+) ORDER BY pais ASC;
+
+
 -- =================================================================================================================
 --   14. Mostrar todas las ciudades por pais en las que predomina la renta de
 --       peliculas de la categoria 'Horror'. Es decir, hay mas rentas que las otras
 --       categorias
 -- =================================================================================================================
+
+
 
 -- =================================================================================================================
 --    15. Mostrar el nombre del pais, la ciudad y el promedio de rentas por ciudad. Por
@@ -212,6 +254,9 @@ SELECT  m.title,
 
 -- =================================================================================================================
 --   20. Mostrar el porcentaje de lenguajes de peliculas mas rentadas de cada ciudad
---       durante el mes de julio del aÃ±o 2005 de la siguiente manera: ciudad,
+--       durante el mes de julio del año 2005 de la siguiente manera: ciudad,
 --       lenguaje, porcentaje de renta.
 -- =================================================================================================================
+
+
+

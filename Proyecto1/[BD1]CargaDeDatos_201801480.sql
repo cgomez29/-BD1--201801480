@@ -323,7 +323,7 @@ INSERT INTO MOVIE_LANGUAGE(movie_id, language_id)
 -- Inserting data to the INVENTORY table 
 -- ==================================================================================================
 
-INSERT INTO INVENTORY(stock, movie_id, shop_id)
+--INSERT INTO INVENTORY(stock, movie_id, shop_id)
     SELECT  COUNT(t1.nombre_pelicula) Stock,
             m.movie_id,
             s.shop_id
@@ -351,15 +351,14 @@ INSERT INTO INVENTORY(stock, movie_id, shop_id)
 -- Inserting data to the RENTAL_MOVIE table 
 -- ==================================================================================================
 
-
 INSERT INTO RENTAL_MOVIE (rental_date, return_date, amount_to_pay, pay_date, employee_id, inventory_id, customer_id)
-    SELECT  (TO_TIMESTAMP(t1.fecha_renta, 'DD-MM-YYYY HH24:MI')), 
-            (CASE WHEN t1.fecha_retorno = '-' THEN NULL ELSE TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI') END) AS ReturnDate,
-             t1.monto_a_pagar,
-            (TO_TIMESTAMP(t1.fecha_pago, 'DD-MM-YYYY HH24:MI')),
-            e.employee_id,
-            i.inventory_id,
-            c.customer_id
+  SELECT DISTINCT   (TO_TIMESTAMP(t1.fecha_renta, 'DD-MM-YYYY HH24:MI')), 
+                    (CASE WHEN t1.fecha_retorno = '-' THEN NULL ELSE TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI') END) AS ReturnDate,
+                     t1.monto_a_pagar,
+                    (TO_TIMESTAMP(t1.fecha_pago, 'DD-MM-YYYY HH24:MI')),
+                    e.employee_id,
+                    i.inventory_id,
+                    c.customer_id
         FROM TEMPORARY t1
             INNER JOIN MOVIE m ON t1.nombre_pelicula = m.title 
             INNER JOIN INVENTORY i ON m.movie_id = i.movie_id
@@ -370,25 +369,8 @@ INSERT INTO RENTAL_MOVIE (rental_date, return_date, amount_to_pay, pay_date, emp
                         SELECT ad.address_id
                             FROM TEMPORARY temp
                                 INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
-                                    WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_preferida
+                                    WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_pelicula
                                     GROUP BY temp.nombre_tienda, ad.address_id
                         )
-                )
-                    GROUP BY    
-                                t1.fecha_renta, 
-                                t1.fecha_retorno, 
-                                t1.fecha_pago,
-                                t1.monto_a_pagar,
-                                t1.fecha_pago,
-                                e.employee_id,
-                                i.inventory_id,
-                                c.customer_id;
+                );
 
--- ==================================================================================================
--- Inserting data to the SHOP_INVENTORY table 
--- ==================================================================================================
-
--- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
-
-
--- alter session set nls_date_format = 'DD/MM/YYYY HH24:MI:SS'

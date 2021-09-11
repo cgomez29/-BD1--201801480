@@ -43,3 +43,38 @@ INSERT INTO REWARD(amount_to_pay, pay_date, employee_id)
                         nombre_pelicula,
                         fecha_pago,
                         e.employee_id;
+
+
+-- rental_movie
+
+
+    SELECT DISTINCT  (TO_TIMESTAMP(t1.fecha_renta, 'DD-MM-YYYY HH24:MI')) AS rental_date, 
+            (CASE WHEN t1.fecha_retorno = '-' THEN NULL ELSE TO_TIMESTAMP(t1.fecha_retorno, 'DD-MM-YYYY HH24:MI') END) AS return_date,
+             t1.monto_a_pagar AS amount_to_pay,
+            (TO_TIMESTAMP(t1.fecha_pago, 'DD-MM-YYYY HH24:MI')) AS pay_date,
+            e.employee_id,
+            i.inventory_id AS inventory_id,
+            c.customer_id AS customer_id
+        FROM TEMPORARY t1
+            INNER JOIN EMPLOYEE e ON t1.usuario_empleado = e.username
+            INNER JOIN CUSTOMER c ON t1.correo_cliente = c.email
+            INNER JOIN INVENTORY i ON i.inventory_id = (
+                    SELECT  inv.inventory_id 
+                            FROM INVENTORY inv 
+                                INNER JOIN MOVIE m ON inv.movie_id = m.movie_id 
+                                INNER JOIN SHOP s ON inv.shop_id = s.shop_id 
+                                    WHERE   t1.tienda_pelicula != '-' AND t1.nombre_pelicula != '-' AND
+                                            m.title = t1.nombre_pelicula AND s.shop_id = (
+                                                SELECT sh.shop_id FROM SHOP sh WHERE sh.address_id = (
+                                                    SELECT ad.address_id
+                                                        FROM TEMPORARY temp
+                                                            INNER JOIN ADDRESS ad ON temp.direccion_tienda = ad.direction
+                                                                WHERE temp.nombre_tienda != '-' AND temp.nombre_tienda = t1.tienda_pelicula
+                                                                GROUP BY temp.nombre_tienda, ad.address_id
+                                                    )
+                    )
+                ) 
+            
+            WHERE   t1.nombre_cliente != '-' AND t1.nombre_pelicula != '-' AND t1.nombre_empleado != '-' AND
+                    t1.tienda_pelicula != '-';   
+  

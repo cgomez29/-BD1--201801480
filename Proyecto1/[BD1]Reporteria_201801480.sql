@@ -5,12 +5,12 @@
 -- =================================================================================================================
 --   1. Mostrar la cantidad de copias que existen en el inventario para la pelicula
 --      'Sugar Wonka'.
--- =================================================================================================================
-SELECT SUM(Cantidad) FROM (
-    SELECT i.stock AS Cantidad
-        FROM INVENTORY i
-            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
-                WHERE m.title = 'SUGAR WONKA');
+-- =================================================================================================================.
+
+SELECT i.stock AS Cantidad
+    FROM INVENTORY i
+        INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+            WHERE m.title = 'SUGAR WONKA';
 
 -- =================================================================================================================
 --   2. Mostrar el nombre, apellido y pago total de todos los clientes que han rentado
@@ -18,16 +18,16 @@ SELECT SUM(Cantidad) FROM (
 -- =================================================================================================================
 
 SELECT * FROM (
-    SELECT  COUNT(c.customer_id) total,
+    SELECT  COUNT(c.customer_id) cantidad,
             c.name,
             c.surname,
-            SUM(amount_to_pay)
+            SUM(amount_to_pay) AS total
         FROM RENTAL_MOVIE r  
             INNER JOIN CUSTOMER c ON r.customer_id = c.customer_id
                 GROUP BY    c.customer_id,
                             c.name,
                             c.surname
-    ) WHERE total >= 40;
+    ) WHERE cantidad >= 40;
 
 -- =================================================================================================================
 --   3. Mostrar el nombre y apellido del cliente y el nombre de la pelicula de todos
@@ -56,7 +56,7 @@ SELECT nombre, apellido, pelicula FROM (
 SELECT CONCAT(CONCAT(a.name, ' '), a.surname)
     FROM ACTOR a
         WHERE a.surname LIKE ('%son%')
-            ORDER BY a.name DESC;
+            ORDER BY a.name ASC;
 
 -- =================================================================================================================
 --    5. Mostrar el apellido de todos los actores y la cantidad de actores que tienen
@@ -79,7 +79,7 @@ SELECT  COUNT(a.surname),
 
 -- =================================================================================================================
 --    6. Mostrar el nombre y apellido de los actores que participaron en una pelicula
---       que involucra un 'Cocodrilo' y un 'Tiburon' junto con el aï¿½o de lanzamiento
+--       que involucra un 'Cocodrilo' y un 'Tiburon' junto con el ao de lanzamiento
 --       de la pelicula, ordenados por el apellido del actor en forma ascendente.
 -- =================================================================================================================
 
@@ -124,14 +124,18 @@ SELECT name FROM (
                 GROUP BY    c.name
 ) WHERE ((remplazo - alquiler)/cantidad) > 17;
 
+SELECT  c.name
+    FROM MOVIE m
+        INNER JOIN CATEGORY c ON m.category_id = c.category_id 
+            GROUP BY    c.name
+                HAVING AVG(damage_cost - rental_cost) > 17;
+
 -- =================================================================================================================
 --    9. Mostrar el titulo de la pelicula, el nombre y apellido del actor de todas
 --       aquellas peliculas en las que uno o mas actores actuaron en dos o mas
 --       peliculas.
 -- =================================================================================================================
 
-
---XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 SELECT  m.title,
         a.name,
         a.surname
@@ -144,7 +148,6 @@ SELECT  m.title,
                             GROUP BY ma.actor_id
             ) WHERE actuo >= 2
         );
---XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         
 
 -- =================================================================================================================
@@ -161,14 +164,58 @@ SELECT  m.title,
 --       respecto al resto de clientes del pais
 -- =================================================================================================================
 
-SELECT  co.name AS pais,
-        cu.name AS nombre
-    FROM RENTAL_MOVIE r
-        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
-        INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
-        INNER JOIN CITY ci ON a.city_id = ci.city_id
-        INNER JOIN COUNTRY co ON ci.country_id = co.country_id; 
-        
+SELECT  pais, 
+        nombre, 
+        ((cantidad*100)/
+            (
+                SELECT COUNT(m.movie_id) 
+                FROM RENTAL_MOVIE r
+                    INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
+                    INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
+                    INNER JOIN CITY ci ON a.city_id = ci.city_id
+                    INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                    INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id  
+                    INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+                        WHERE co.name = pais
+                            GROUP BY    co.name
+            )
+        ) AS porcentaje
+    FROM (
+    SELECT  co.name AS pais,
+            cu.name AS nombre,
+            COUNT(m.movie_id) AS cantidad
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
+            INNER JOIN CITY ci ON a.city_id = ci.city_id
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+            INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id  
+            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+                GROUP BY    co.name,
+                            cu.surname,
+                            cu.email, 
+                            cu.name
+                    ORDER BY    co.name,
+                                cantidad DESC
+) WHERE cantidad = (
+    SELECT COUNT(m.movie_id) AS cantidad
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
+            INNER JOIN CITY ci ON a.city_id = ci.city_id
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+            INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id  
+            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+            WHERE co.name = pais
+                GROUP BY    co.name,
+                            cu.surname,
+                            cu.email, 
+                            cu.name
+                    ORDER BY    co.name,
+                                cantidad DESC FETCH FIRST 1 ROWS ONLY 
+) GROUP BY  pais, 
+            nombre,
+            cantidad;
 
 -- =================================================================================================================
 --    12.Mostrar el total de clientes y porcentaje de clientes mujeres por ciudad y pais.
@@ -183,9 +230,7 @@ SELECT  co.name AS pais,
 --       representa el maximo
 -- =================================================================================================================
 
-
-
-SELECT cantidad, pais, name FROM ( 
+SELECT pais, name, cantidad FROM ( 
     SELECT  COUNT(cu.customer_id) cantidad,
             co.name AS pais,
             cu.name AS name
@@ -220,24 +265,156 @@ SELECT cantidad, pais, name FROM (
 --       categorias
 -- =================================================================================================================
 
-
+SELECT ciudad, pais FROM(
+    SELECT categoria, cantidad, ciudad, pais FROM (
+        SELECT  ca.name AS categoria,
+                count(ca.name) AS cantidad,
+                ci.name AS ciudad,
+                co.name AS pais
+            FROM RENTAL_MOVIE r
+                INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+                INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+                INNER JOIN CITY ci ON a.city_id = ci.city_id 
+                INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
+                INNER JOIN MOVIE m ON i.movie_id = m.movie_id 
+                INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+                    GROUP BY    ca.name,
+                                ci.name,
+                                co.name
+                        ORDER BY co.name,
+                                 ci.name,
+                                 cantidad DESC
+    ) WHERE cantidad = (
+        SELECT  COUNT(ca.name) AS cantidad
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+            INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
+            INNER JOIN MOVIE m ON i.movie_id = m.movie_id 
+            INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+                WHERE ci.name = ciudad AND co.name = pais
+                GROUP BY    ca.name,
+                            ci.name,
+                            co.name
+                    ORDER BY co.name,
+                             ci.name,
+                             cantidad DESC FETCH FIRST 1 ROWS ONLY  
+    )   AND categoria = 'Horror'
+);
 
 -- =================================================================================================================
 --    15. Mostrar el nombre del pais, la ciudad y el promedio de rentas por ciudad. Por
 --        ejemplo: si el pais tiene 3 ciudades, se deben sumar todas las rentas de la
 --        ciudad y dividirlo dentro de tres (numero de ciudades del pais).
 -- =================================================================================================================
+--SELECT COUNT(*) FROM (
+SELECT  TRUNC(cantidad/( 
+            SELECT  count(ci.name)
+                FROM CITY ci 
+                    INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                        WHERE co.name = pais
+                            GROUP BY co.name
+        ),1) AS promedio, 
+        pais,
+        ciudad 
+    FROM (
+    SELECT  COUNT(r.rental_movie_id) AS cantidad,
+            ci.name AS ciudad,
+            co.name AS pais
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                GROUP BY    co.name,
+                            ci.name
+);
+
+ SELECT  COUNT(r.rental_movie_id) AS cantidad,
+            ci.name AS ciudad,
+            co.name AS pais
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                GROUP BY    co.name,
+                            ci.name    
+            
+
+SELECT  count(ci.name)
+                FROM CITY ci 
+                    INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                        WHERE co.name = 'Argentina'
+                            GROUP BY co.name;
+
+
+ SELECT  SUM(r.rental_movie_id) AS cantidad,
+            ci.name AS ciudad,
+            co.name AS pais
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+                GROUP BY    co.name,
+                            ci.name    
 
 -- =================================================================================================================
 --   16. Mostrar el nombre del pais y el porcentaje de rentas de peliculas de la
 --       categoria 'Sports'.
 -- =================================================================================================================
 
+SELECT  COUNT(rental_movie_id) AS cantidad,
+        co.name AS pais
+    FROM RENTAL_MOVIE r
+        INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+        INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+        INNER JOIN CITY ci ON a.city_id = ci.city_id 
+        INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+        INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
+        INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+        INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+            WHERE   ca.name = 'Sports'
+            GROUP BY    co.name,
+                        ci.name 
+
+
 -- =================================================================================================================
 --   17. Mostrar la lista de ciudades de Estados Unidos y el numero de rentas de
 --       peliculas para las ciudades que obtuvieron mas rentas que la ciudad
 --       'Dayton'.
 -- =================================================================================================================
+
+SELECT cantidad, ciudad FROM (
+    SELECT  COUNT(rental_movie_id) AS cantidad,
+            ci.name AS ciudad
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+            INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
+            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+            INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+                WHERE   co.name = 'United States' 
+                GROUP BY    ci.name
+) WHERE cantidad > (
+    SELECT  COUNT(rental_movie_id) AS cantidad
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
+            INNER JOIN ADDRESS a ON cu.address_id = a.address_id
+            INNER JOIN CITY ci ON a.city_id = ci.city_id 
+            INNER JOIN COUNTRY co ON ci.country_id = co.country_id
+            INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
+            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+            INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+                WHERE   co.name = 'United States' AND ci.name = 'Dayton'
+                GROUP BY    ci.name
+);
 
 -- =================================================================================================================
 --   18. Mostrar el nombre, apellido y fecha de retorno de pelicula a la tienda de todos
@@ -246,17 +423,38 @@ SELECT cantidad, pais, name FROM (
 --       dolares en sus rentas del dia en la que el cliente rento la pelicula.
 -- =================================================================================================================
 
+SELECT  cu.name,
+        cu.surname,
+        r.return_date,
+    FROM RENTAL_MOVIE r 
+        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
+     
+
 -- =================================================================================================================
 --   19. Mostrar el numero de mes, de la fecha de renta de la pelicula, nombre y
 --       apellido de los clientes que mas peliculas han rentado y las que menos en
 --       una sola consulta.
 -- =================================================================================================================
 
+SELECT  cu.name,
+        cu.surname
+    FROM RENTAL_MOVIE r
+        INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id 
+        INNER JOIN MOVIE m ON i.movie_id = m.movie_id
+        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
+        
+    
 -- =================================================================================================================
 --   20. Mostrar el porcentaje de lenguajes de peliculas mas rentadas de cada ciudad
---       durante el mes de julio del año 2005 de la siguiente manera: ciudad,
+--       durante el mes de julio del ano 2005 de la siguiente manera: ciudad,
 --       lenguaje, porcentaje de renta.
 -- =================================================================================================================
 
-
-
+SELECT  ci.name AS ciudad,
+        la.name AS lenguaje,
+    FROM RENTAL_MOVIE r
+        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
+        INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
+        INNER JOIN CITY ci ON a.city_id = ci.city_id 
+        INNER JOIN COUNTRY co ON ci.country_id = co.country_id 
+        

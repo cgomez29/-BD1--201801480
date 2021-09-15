@@ -135,7 +135,7 @@ SELECT  c.name
 --       aquellas peliculas en las que uno o mas actores actuaron en dos o mas
 --       peliculas.
 -- =================================================================================================================
-
+select count(*) from (
 SELECT  m.title,
         a.name,
         a.surname
@@ -147,7 +147,7 @@ SELECT  m.title,
                     FROM MOVIE_ACTOR ma 
                             GROUP BY ma.actor_id
             ) WHERE actuo >= 2
-        );
+        ));
         
 
 -- =================================================================================================================
@@ -436,13 +436,27 @@ SELECT  cu.name,
 --       una sola consulta.
 -- =================================================================================================================
 
-SELECT  cu.name,
-        cu.surname
+(SELECT  TO_CHAR(r.rental_date,'MM'),
+        cu.name,
+        cu.surname,
+        COUNT(r.rental_movie_id) AS cantidad
     FROM RENTAL_MOVIE r
-        INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id 
-        INNER JOIN MOVIE m ON i.movie_id = m.movie_id
         INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
-        
+        GROUP BY    cu.name,
+                    cu.surname,
+                    r.rental_date
+            ORDER BY cantidad DESC FETCH FIRST 10 ROW ONLY)
+UNION 
+(SELECT  TO_CHAR(r.rental_date,'MM'),
+        cu.name,
+        cu.surname,
+        COUNT(r.rental_movie_id) AS cantidad
+    FROM RENTAL_MOVIE r
+        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
+        GROUP BY    cu.name,
+                    cu.surname,
+                    r.rental_date
+            ORDER BY cantidad ASC FETCH FIRST 10 ROW ONLY);
     
 -- =================================================================================================================
 --   20. Mostrar el porcentaje de lenguajes de peliculas mas rentadas de cada ciudad
@@ -450,11 +464,24 @@ SELECT  cu.name,
 --       lenguaje, porcentaje de renta.
 -- =================================================================================================================
 
+
+--porcentaje de lenguajes de las peliculas mas rentadas de cada ciudad 
+
+
+--where mes = 7 year = 2005
+
 SELECT  ci.name AS ciudad,
-        la.name AS lenguaje,
+        co.name AS pais,
+        COUNT(la.language_id) AS cantidad  
     FROM RENTAL_MOVIE r
         INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
         INNER JOIN ADDRESS a ON cu.address_id = a.address_id 
         INNER JOIN CITY ci ON a.city_id = ci.city_id 
         INNER JOIN COUNTRY co ON ci.country_id = co.country_id 
-        
+        INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id 
+        INNER JOIN MOVIE m ON i.movie_id = m.movie_id 
+        INNER JOIN MOVIE_LANGUAGE ml ON m.movie_language_id = ml.movie_language_id
+        INNER JOIN LANGUAGE la ON ml.language_id = la.language_id
+            GROUP BY    co.name,
+                        ci.name;
+                        cantidad    

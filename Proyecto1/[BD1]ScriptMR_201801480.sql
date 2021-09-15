@@ -212,7 +212,8 @@ CREATE TABLE MOVIE(
     damage_cost         NUMBER(8,2)     NOT NULL,
     native_language     NUMBER          NOT NULL,
     classification_id   NUMBER          NOT NULL,
-    category_id         NUMBER          NOT NULL
+    category_id         NUMBER          NOT NULL,
+    movie_language_id   NUMBER          NOT NULL
 );
 
 ALTER TABLE MOVIE 
@@ -225,6 +226,10 @@ ALTER TABLE MOVIE
 ALTER TABLE MOVIE 
     ADD CONSTRAINT movie_category_fk FOREIGN KEY(category_id)
         REFERENCES CATEGORY(category_id) ON DELETE CASCADE;
+
+ALTER TABLE MOVIE 
+    ADD CONSTRAINT movie_movie_language_fk FOREIGN KEY(movie_language_id)
+        REFERENCES MOVIE_LANGUAGE(movie_language_id) ON DELETE CASCADE;
 
 -- ==================================================================================================
 -- Creation of the MOVIE_ACTOR table 

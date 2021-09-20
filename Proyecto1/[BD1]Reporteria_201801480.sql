@@ -97,11 +97,8 @@ SELECT  a.name,
     FROM MOVIE_ACTOR ma 
         INNER JOIN MOVIE m ON ma.movie_id = m.movie_id
         INNER JOIN ACTOR a ON ma.actor_id = a.actor_id
-            WHERE m.description LIKE('%crocodrile%') OR m.description LIKE('%shark%') OR
-                  m.description LIKE('%Crocodrile%') OR m.description LIKE('%Shark%') OR
-                  m.description LIKE('%CROCODRILE%') OR m.description LIKE('%SHARK%')
+            WHERE INSTR(LOWER(m.description), 'crocodile') > 0 AND  INSTR(LOWER(m.description), 'shark') > 0
                 ORDER BY a.surname ASC;
-
 
 -- =================================================================================================================
 --   7. Mostrar el nombre de la categoria y el numero de peliculas por categoria de
@@ -172,6 +169,24 @@ SELECT pelicula, nombre, apellido FROM(
 --       dentro de la consulta. No puede utilizar el nombre del actor como una
 --       constante, unicamente el ID proporcionado.
 -- =================================================================================================================
+
+SELECT nombre, apellido 
+FROM(
+    SELECT  a.name AS nombre,
+            a.surname AS apellido
+    FROM ACTOR a
+UNION 
+    SELECT  cu.name AS nombre,
+            cu.surname AS apellido
+    FROM CUSTOMER cu
+) TABLA1 
+INNER JOIN (
+    SELECT  a.name AS nombre_actor,
+            a.surname AS apellido_actor
+    FROM ACTOR a
+        WHERE a.name LIKE '%MATTHEW JOHANSSON%'
+) ON nombre = nombre_actor 
+WHERE apellido <> apellido_actor;
 
 -- =================================================================================================================
 --   11. Mostrar el pais y el nombre del cliente que mas peliculas rento asi como
@@ -441,7 +456,7 @@ SELECT nombre, apellido, fecha_retorno FROM (
                                 r.amount_to_pay
 )   GROUP BY nombre, apellido, fecha_retorno
         HAVING SUM(ganancia) >= 15 AND COUNT(ganancia) >=2
-            ORDER BY nombre
+            ORDER BY nombre;
                     
 
 -- =================================================================================================================

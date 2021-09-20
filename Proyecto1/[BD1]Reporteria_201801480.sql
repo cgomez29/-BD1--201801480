@@ -60,31 +60,28 @@ SELECT CONCAT(CONCAT(a.name, ' '), a.surname)
 --       con dos actores.
 -- =================================================================================================================
 
-SELECT  COUNT(a.surname),
-        a.surname 
-    FROM  ACTOR a
-        WHERE a.name IN (
-            SELECT name FROM (
-                SELECT  COUNT(a.name) AS n,
-                        a.name
-                    FROM ACTOR a 
-                        GROUP BY a.name
-                ) WHERE n >= 2            
-            )
-        GROUP BY a.surname;
+SELECT apellido, cantidad FROM (
+    SELECT  a.surname AS apellido,
+            COUNT(a.surname) AS cantidad
+        FROM ACTOR a
+            GROUP BY a.surname
+) INNER JOIN (
+    SELECT nombre, apellido AS apellido1 FROM (
+        SELECT  a.name AS nombre,
+                a.surname AS apellido
+            FROM ACTOR a
+                GROUP BY    a.name,
+                            a.surname
+    ) INNER JOIN (
+        SELECT  a.name AS nombre2 
+            FROM ACTOR a
+                GROUP BY a.name
+                    HAVING COUNT(a.name) >= 2
+    ) ON nombre2 = nombre
 
-
-
-    SELECT  COUNT(ac.surname) AS n,
-            ac.surname
-        FROM ACTOR ac 
-            GROUP BY ac.surname ;
-                SELECT  a.name,
-                        a.surname
-                    FROM ACTOR a 
-                        GROUP BY a.name,
-                                 a.surname
-                        HAVING COUNT(a.name) >= 2;
+) ON apellido = apellido1
+    GROUP BY apellido, cantidad
+        ORDER BY apellido ASC;
 
 
 -- =================================================================================================================
@@ -126,7 +123,7 @@ SELECT name, cantidad FROM (
 --      a 17.
 -- =================================================================================================================
 
-SELECT name FROM (
+SELECT name, ROUND((remplazo - alquiler)/cantidad, 2)AS promedio FROM (
     SELECT  c.name,
             COUNT(m.movie_id) AS cantidad,
             SUM(damage_cost) AS remplazo,
@@ -137,7 +134,7 @@ SELECT name FROM (
 ) WHERE ((remplazo - alquiler)/cantidad) > 17;
 
 SELECT  c.name,
-        AVG(damage_cost - rental_cost)
+        ROUND(AVG(damage_cost - rental_cost),2) AS promedio
     FROM MOVIE m
         INNER JOIN CATEGORY c ON m.category_id = c.category_id 
             GROUP BY    c.name
@@ -148,20 +145,25 @@ SELECT  c.name,
 --       aquellas peliculas en las que uno o mas actores actuaron en dos o mas
 --       peliculas.
 -- =================================================================================================================
-select count(*) from (
-SELECT  m.title,
-        a.name,
-        a.surname
-    FROM MOVIE m, ACTOR a 
-        WHERE a.actor_id IN (
-            SELECT actor_id FROM (
-                SELECT  ma.actor_id,
-                        COUNT(ma.movie_id) AS actuo
-                    FROM MOVIE_ACTOR ma 
-                            GROUP BY ma.actor_id
-            ) WHERE actuo >= 2
-        ));
-        
+
+SELECT pelicula, nombre, apellido FROM(
+    SELECT  m.title AS pelicula,
+            a.name AS nombre,
+            a.surname AS apellido
+        FROM MOVIE_ACTOR ma
+            INNER JOIN ACTOR a ON a.actor_id = ma.actor_id
+            INNER JOIN MOVIE m ON m.movie_id = ma.movie_id
+) INNER JOIN (
+    SELECT  a.name AS nombre2,
+            a.surname AS apellido2
+        FROM MOVIE_ACTOR ma
+            INNER JOIN ACTOR a ON a.actor_id = ma.actor_id
+            INNER JOIN MOVIE m ON m.movie_id = ma.movie_id
+                GROUP BY    a.name,
+                            a.surname
+                    HAVING  COUNT(a.actor_id) >= 2
+) ON nombre2 = nombre AND apellido2 = apellido
+    GROUP BY pelicula, nombre, apellido
 
 -- =================================================================================================================
 --    10.Mostrar el nombre y apellido (en una sola columna) de todos los actores y
@@ -265,7 +267,7 @@ SELECT pais, ciudad, categoria, cantidad FROM (
         SELECT  co.name AS pais,
                 ci.name AS ciudad,
                 ca.name AS categoria,
-                count(ca.name) AS cantidad
+                COUNT(ca.name) AS cantidad
             FROM RENTAL_MOVIE r
                 INNER JOIN CUSTOMER cu ON r.customer_id =  cu.customer_id
                 INNER JOIN ADDRESS a ON cu.address_id = a.address_id
@@ -418,9 +420,12 @@ SELECT cantidad, ciudad FROM (
 --       dolares en sus rentas del dia en la que el cliente rento la pelicula.
 -- =================================================================================================================
 
+SELECT nombre, apellido, fecha_retorno FROM (
     SELECT  cu.name AS nombre,
             cu.surname AS apellido,
-            TO_CHAR(r.return_date,'DD/MM/YYYY') 
+            r.rental_date,
+            TO_CHAR(r.return_date, 'DD/MM/YYYY') AS fecha_retorno,
+            r.amount_to_pay AS ganancia
         FROM RENTAL_MOVIE r
             INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id 
             INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id 
@@ -431,8 +436,14 @@ SELECT cantidad, ciudad FROM (
                     GROUP BY    cu.name,
                                 cu.surname,
                                 cu.email,
-                                r.return_date 
-                    HAVING COUNT(r.return_date) >= 2 AND SUM(r.amount_to_pay) >= 15
+                                r.rental_date,
+                                r.return_date,
+                                r.amount_to_pay
+)   GROUP BY nombre, apellido, fecha_retorno
+        HAVING SUM(ganancia) >= 15 AND COUNT(ganancia) >=2
+            ORDER BY nombre
+                    
+
 -- =================================================================================================================
 --   19. Mostrar el numero de mes, de la fecha de renta de la pelicula, nombre y
 --       apellido de los clientes que mas peliculas han rentado y las que menos en

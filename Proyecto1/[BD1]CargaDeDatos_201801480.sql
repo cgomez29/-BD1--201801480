@@ -72,8 +72,6 @@ INSERT INTO CITY(name, country_id)
                 WHERE t.ciudad_cliente != '-' and t.pais_cliente != '-'
                     GROUP BY t.ciudad_cliente, c.country_id; 
 
-select * from city;
-
 -- ==================================================================================================
 -- Inserting data to the ACTOR table 
 -- ==================================================================================================
@@ -115,8 +113,6 @@ INSERT INTO LANGUAGE(name)
             WHERE lenguaje_pelicula != '-'
                 GROUP BY lenguaje_pelicula;
 
-select * from language;
-
 -- ==================================================================================================
 -- Inserting data to the ADDRESS table 
 -- ==================================================================================================
@@ -132,6 +128,7 @@ INSERT INTO ADDRESS(direction, postal_code, city_id)
                     GROUP BY    direccion_tienda ,
                                 ciudad_tienda ,
                                 pais_tienda,
+                                codigo_postal_tienda,
                                 c.city_id;
 
 -- Employee address
@@ -284,24 +281,6 @@ INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost,
                             ca.category_id;
 
 -- ==================================================================================================
--- Inserting data to the MOVIE_ACTOR table 
--- ==================================================================================================
-
-INSERT INTO MOVIE_ACTOR(movie_id, actor_id)
-    SELECT  m.movie_id,
-            a.actor_id
-        FROM TEMPORARY 
-            INNER JOIN ACTOR a ON actor_pelicula = CONCAT(CONCAT(name, ' '), surname)
-            INNER JOIN MOVIE m ON nombre_pelicula = m.title
-                WHERE nombre_pelicula != '-' and actor_pelicula != '-'
-                    GROUP BY    nombre_pelicula,
-                                actor_pelicula,
-                                descripcion_pelicula,
-                                ano_lanzamiento,
-                                a.actor_id,
-                                m.movie_id;
-
--- ==================================================================================================
 -- Inserting data to the MOVIE_LANGUAGE table 
 -- ==================================================================================================
 
@@ -320,10 +299,29 @@ INSERT INTO MOVIE_LANGUAGE(movie_id, language_id)
                             l.language_id;
 
 -- ==================================================================================================
+-- Inserting data to the MOVIE_ACTOR table 
+-- ==================================================================================================
+
+INSERT INTO MOVIE_ACTOR(movie_id, actor_id)
+    SELECT  m.movie_id,
+            a.actor_id
+        FROM TEMPORARY 
+            INNER JOIN ACTOR a ON actor_pelicula = CONCAT(CONCAT(name, ' '), surname)
+            INNER JOIN MOVIE m ON nombre_pelicula = m.title
+                WHERE nombre_pelicula != '-' and actor_pelicula != '-'
+                    GROUP BY    nombre_pelicula,
+                                actor_pelicula,
+                                descripcion_pelicula,
+                                ano_lanzamiento,
+                                a.actor_id,
+                                m.movie_id;
+
+
+-- ==================================================================================================
 -- Inserting data to the INVENTORY table 
 -- ==================================================================================================
 
---INSERT INTO INVENTORY(stock, movie_id, shop_id)
+INSERT INTO INVENTORY(stock, movie_id, shop_id)
     SELECT  COUNT(t1.nombre_pelicula) Stock,
             m.movie_id,
             s.shop_id

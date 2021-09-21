@@ -109,8 +109,9 @@ SELECT  a.name,
 SELECT name, cantidad FROM (
     SELECT  c.name,
             COUNT(m.movie_id) AS cantidad 
-        FROM MOVIE m 
-            INNER JOIN CATEGORY c ON m.category_id = c.category_id 
+        FROM MOVIE_CATEGORY mc
+            INNER JOIN MOVIE m ON m.movie_id = mc.movie_id 
+            INNER JOIN CATEGORY c ON mc.category_id = c.category_id 
                 GROUP BY c.name
 ) WHERE cantidad >= 55 AND cantidad <=65;
             
@@ -125,15 +126,17 @@ SELECT name, ROUND((remplazo - alquiler)/cantidad, 2)AS promedio FROM (
             COUNT(m.movie_id) AS cantidad,
             SUM(damage_cost) AS remplazo,
             SUM(rental_cost) AS alquiler
-        FROM MOVIE m
-            INNER JOIN CATEGORY c ON m.category_id = c.category_id 
+         FROM MOVIE_CATEGORY mc
+            INNER JOIN MOVIE m ON m.movie_id = mc.movie_id 
+            INNER JOIN CATEGORY c ON c.category_id = mc.category_id 
                 GROUP BY    c.name
 ) WHERE ((remplazo - alquiler)/cantidad) > 17;
 
 SELECT  c.name,
         ROUND(AVG(damage_cost - rental_cost),2) AS promedio
-    FROM MOVIE m
-        INNER JOIN CATEGORY c ON m.category_id = c.category_id 
+    FROM MOVIE_CATEGORY mc
+        INNER JOIN MOVIE m ON m.movie_id = mc.movie_id 
+        INNER JOIN CATEGORY c ON c.category_id = mc.category_id 
             GROUP BY    c.name
                 HAVING AVG(damage_cost - rental_cost) > 17;
 
@@ -160,7 +163,7 @@ SELECT pelicula, nombre, apellido FROM(
                             a.surname
                     HAVING  COUNT(a.actor_id) >= 2
 ) ON nombre2 = nombre AND apellido2 = apellido
-    GROUP BY pelicula, nombre, apellido
+    GROUP BY pelicula, nombre, apellido;
 
 -- =================================================================================================================
 --    10.Mostrar el nombre y apellido (en una sola columna) de todos los actores y
@@ -289,8 +292,8 @@ SELECT pais, ciudad, categoria, cantidad FROM (
                 INNER JOIN CITY ci ON a.city_id = ci.city_id 
                 INNER JOIN COUNTRY co ON ci.country_id = co.country_id
                 INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
-                INNER JOIN MOVIE m ON i.movie_id = m.movie_id 
-                INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+                INNER JOIN MOVIE_CATEGORY mc ON mc.movie_id = i.movie_id
+                INNER JOIN CATEGORY ca ON mc.category_id = ca.category_id
                     GROUP BY    ca.name,
                                 ci.name,
                                 co.name
@@ -306,8 +309,8 @@ SELECT pais, ciudad, categoria, cantidad FROM (
                     INNER JOIN CITY ci ON a.city_id = ci.city_id 
                     INNER JOIN COUNTRY co ON ci.country_id = co.country_id
                     INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
-                    INNER JOIN MOVIE m ON i.movie_id = m.movie_id 
-                    INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+                    INNER JOIN MOVIE_CATEGORY mc ON mc.movie_id = i.movie_id
+                    INNER JOIN CATEGORY ca ON mc.category_id = ca.category_id
                         GROUP BY    ca.name,
                                     ci.name,
                                     co.name
@@ -389,8 +392,8 @@ SELECT  pais,
             INNER JOIN CITY ci ON a.city_id = ci.city_id 
             INNER JOIN COUNTRY co ON ci.country_id = co.country_id
             INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
-            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
-            INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+            INNER JOIN MOVIE_CATEGORY mc ON mc.movie_id = i.movie_id
+            INNER JOIN CATEGORY ca ON mc.category_id = ca.category_id
                 WHERE   ca.name = 'Sports'
                 GROUP BY    co.name
 );
@@ -410,8 +413,8 @@ SELECT cantidad, ciudad FROM (
             INNER JOIN CITY ci ON a.city_id = ci.city_id 
             INNER JOIN COUNTRY co ON ci.country_id = co.country_id
             INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
-            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
-            INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+            INNER JOIN MOVIE_CATEGORY mc ON mc.movie_id = i.movie_id
+            INNER JOIN CATEGORY ca ON mc.category_id = ca.category_id
                 WHERE   co.name = 'United States' 
                 GROUP BY    ci.name
 ) WHERE cantidad > (
@@ -422,8 +425,8 @@ SELECT cantidad, ciudad FROM (
             INNER JOIN CITY ci ON a.city_id = ci.city_id 
             INNER JOIN COUNTRY co ON ci.country_id = co.country_id
             INNER JOIN INVENTORY i ON r.inventory_id = i.inventory_id
-            INNER JOIN MOVIE m ON i.movie_id = m.movie_id
-            INNER JOIN CATEGORY ca ON m.category_id = ca.category_id
+            INNER JOIN MOVIE_CATEGORY mc ON mc.movie_id = i.movie_id
+            INNER JOIN CATEGORY ca ON mc.category_id = ca.category_id
                 WHERE   co.name = 'United States' AND ci.name = 'Dayton'
                 GROUP BY    ci.name
 );

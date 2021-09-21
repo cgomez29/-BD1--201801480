@@ -23,10 +23,10 @@ SELECT COUNT(*) FROM RENTAL_MOVIE;
 
 SELECT table_name, num_rows FROM all_tables WHERE owner = 'DB1';
 
-select 'select count(*) from '||table_name||';' from dba_tables where owner = 'DB1';
+SELECT 'SELECT COUNT(*) FROM '||table_name||';' FROM dba_tables WHERE owner = 'DB1';
 
 
-select table_name, 
-       to_number(extractvalue(xmltype(dbms_xmlgen.getxml('select count(*) c from '||owner||'.'||table_name)),'/ROWSET/ROW/C')) as count
-from all_tables
-where owner = 'DB1'
+SELECT table_name, 
+       to_number(extractvalue(xmltype(dbms_xmlgen.getxml('SELECT COUNT(*) c FROM '||owner||'.'||table_name)),'/ROWSET/ROW/C')) as COUNT
+FROM all_tables
+WHERE owner = 'DB1'

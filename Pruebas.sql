@@ -296,3 +296,9 @@ SELECT  count(ci.name)
             INNER JOIN COUNTRY co ON ci.country_id = co.country_id
                 GROUP BY    co.name,
                             ci.name  
+
+
+ALTER TABLE EMPLOYEE
+    ADD CONSTRAINT ck_employee_active CHECK (active IN ('Si', 'No'));
+
+select * from employee;

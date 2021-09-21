@@ -1,55 +1,5 @@
 /* Author: Cristian Gomez - 201801480 */
--- data upload
-
-/*
-    nombre_cliente ,
-    correo_cliente ,
-    cliente_activo ,
-    fecha_creacion TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF',
-    tienda_preferida ,
-    direccion_cliente ,
-    codigo_postal_cliente ,
-    ciudad_cliente ,
-    pais_cliente , 
-    fecha_renta TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF', 
-    fecha_retorno TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF', 
-    monto_a_pagar ,
-    fecha_pago TIMESTAMP 'YYYY-MM-DD HH24:MI:SS.FF', 
-    --  EMPLOYEE    
-    nombre_empleado ,
-    correo_empleado ,
-    empleado_activo ,
-    tienda_empleado ,
-    usuario_empleado ,
-    password_empleado ,
-    direccion_empleado ,
-    codigo_postal_empleado ,
-    ciudad_empleado ,
-    pais_empleado ,
-    -- EMPLOYEE
-    -- SHOP
-    nombre_tienda ,
-    encargado_tienda ,
-    direccion_tienda ,
-    codigo_postal_tienda ,
-    ciudad_tienda ,
-    pais_tienda , 
-    -- END SHOP
-    tienda_pelicula ,  --X -- Ubicacion de la pelicula 
-    nombre_pelicula , --X
-    descripcion_pelicula , --X
-    ano_lanzamiento , --X
-    dias_renta , --X
-    costo_renta , --X
-    duracion , --X
-    costo_por_dano , --X
-    clasificacion , --X
-    lenguaje_pelicula , --X
-    categoria_pelicula , --X
-    actor_pelicula 
-*/
-
-
+-- upload data
 
 -- ==================================================================================================
 -- Inserting data to the COUNTRY table 
@@ -250,7 +200,7 @@ SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,
 -- Inserting data to the MOVIE table 
 -- ==================================================================================================
 
-INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost, damage_cost, native_language, classification_id, category_id)
+INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost, damage_cost, native_language, classification_id)
     SELECT  nombre_pelicula,
             descripcion_pelicula,
             ano_lanzamiento,
@@ -259,11 +209,9 @@ INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost,
             costo_renta,
             costo_por_dano,
             l.language_id,
-            c.classification_id,
-            ca.category_id
+            c.classification_id
     FROM TEMPORARY
         INNER JOIN CLASSIFICATION c ON  clasificacion = c.name 
-        INNER JOIN CATEGORY ca ON  categoria_pelicula = ca.name 
         INNER JOIN LANGUAGE l ON lenguaje_pelicula = l.name
             WHERE nombre_pelicula != '-'
                 GROUP BY    nombre_pelicula,
@@ -277,7 +225,24 @@ INSERT INTO MOVIE(title, description, release_year, duration, days, rental_cost,
                             lenguaje_pelicula,
                             categoria_pelicula,
                             l.language_id,
-                            c.classification_id,
+                            c.classification_id;
+
+-- ==================================================================================================
+-- Inserting data to the MOVIE_CATEGORY table 
+-- ==================================================================================================
+
+INSERT INTO MOVIE_CATEGORY(movie_id, category_id)
+    SELECT  m.movie_id,
+            ca.category_id
+        FROM TEMPORARY 
+            INNER JOIN CATEGORY ca ON categoria_pelicula = ca.name
+            INNER JOIN MOVIE m ON nombre_pelicula = m.title
+            WHERE nombre_pelicula != '-'
+                GROUP BY    nombre_pelicula,
+                            descripcion_pelicula,
+                            ano_lanzamiento,
+                            categoria_pelicula,
+                            m.movie_id,
                             ca.category_id;
 
 -- ==================================================================================================

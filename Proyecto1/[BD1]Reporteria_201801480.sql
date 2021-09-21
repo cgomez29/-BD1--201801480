@@ -184,7 +184,7 @@ INNER JOIN (
     SELECT  a.name AS nombre_actor,
             a.surname AS apellido_actor
     FROM ACTOR a
-        WHERE a.name LIKE '%MATTHEW JOHANSSON%'
+        WHERE a.name LIKE 'Matthew' AND a.surname = 'Johansson'
 ) ON nombre = nombre_actor 
 WHERE apellido <> apellido_actor;
 
@@ -465,30 +465,44 @@ SELECT nombre, apellido, fecha_retorno FROM (
 --       una sola consulta.
 -- =================================================================================================================
 
-(SELECT  TO_CHAR(r.rental_date,'MM'),
-        cu.name,
-        cu.surname,
-        COUNT(r.rental_movie_id) AS cantidad
-    FROM RENTAL_MOVIE r
-        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
-        GROUP BY    cu.name,
-                    cu.surname,
-                    cu.email,
-                    r.rental_date
-            ORDER BY cantidad DESC FETCH FIRST 5 ROW ONLY)
-
-UNION 
-(SELECT  TO_CHAR(r.rental_date,'MM'),
-        cu.name,
-        cu.surname,
-        COUNT(r.rental_movie_id) AS cantidad
-    FROM RENTAL_MOVIE r
-        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
-        GROUP BY    cu.name,
-                    cu.surname,
-                    cu.email,
-                    r.rental_date
-            ORDER BY cantidad ASC FETCH FIRST 5 ROW ONLY);
+(SELECT DISTINCT mes, nombre, apellido FROM (
+    SELECT  TO_CHAR(r.rental_date,'MM') AS mes,
+            cu.name AS nombre,
+            cu.surname AS apellido
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
+            WHERE cu.customer_id = (
+                SELECT  cu.customer_id
+                    FROM RENTAL_MOVIE r
+                        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id            
+                        GROUP BY cu.customer_id
+                        HAVING COUNT(cu.customer_id) = (
+                            SELECT MAX(COUNT(r.customer_id)) AS maximo
+                                FROM RENTAL_MOVIE r
+                                    GROUP BY r.customer_id 
+                        )        
+            ) 
+)           
+)UNION(       
+SELECT DISTINCT mes, nombre, apellido FROM (
+    SELECT  TO_CHAR(r.rental_date,'MM') AS mes,
+            cu.name AS nombre,
+            cu.surname AS apellido
+        FROM RENTAL_MOVIE r
+            INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id
+            WHERE cu.customer_id = (
+                SELECT  cu.customer_id
+                    FROM RENTAL_MOVIE r
+                        INNER JOIN CUSTOMER cu ON r.customer_id = cu.customer_id            
+                        GROUP BY cu.customer_id
+                        HAVING COUNT(cu.customer_id) = (
+                            SELECT MIN(COUNT(r.customer_id)) AS maximo
+                                FROM RENTAL_MOVIE r
+                                    GROUP BY r.customer_id 
+                        )        
+            ) 
+)         
+) ORDER BY nombre, mes;
     
 -- =================================================================================================================
 --   20. Mostrar el porcentaje de lenguajes de peliculas mas rentadas de cada ciudad

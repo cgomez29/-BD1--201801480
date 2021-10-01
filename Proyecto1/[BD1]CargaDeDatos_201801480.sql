@@ -81,42 +81,6 @@ INSERT INTO ADDRESS(direction, postal_code, city_id)
                                 codigo_postal_tienda,
                                 c.city_id;
 
--- Employee address
-INSERT INTO ADDRESS(direction, postal_code, city_id)
-    SELECT  direccion_empleado, 
-            (CASE WHEN codigo_postal_empleado = '-' THEN NULL ELSE codigo_postal_empleado END)AS CODE,
-            c.city_id
-        FROM TEMPORARY 
-            INNER JOIN CITY c ON ciudad_empleado = c.name 
-            WHERE nombre_empleado != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_empleado) 
-                GROUP BY    nombre_empleado,
-                            direccion_empleado ,
-                            codigo_postal_empleado ,
-                            ciudad_empleado ,
-                            pais_empleado,
-                            c.city_id;
-                            
-                            
--- Customer address
-
-INSERT INTO ADDRESS(direction, postal_code, city_id)
-    SELECT  direccion_cliente, 
-            (CASE WHEN codigo_postal_cliente = '-' THEN NULL ELSE codigo_postal_cliente END) AS CODE,
-            c.city_id
-        FROM TEMPORARY 
-            INNER JOIN CITY c ON ciudad_cliente = c.name 
-            WHERE nombre_cliente != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_cliente) 
-                GROUP BY    nombre_cliente ,
-                            correo_cliente ,
-                            cliente_activo ,
-                            fecha_creacion ,
-                            tienda_preferida ,
-                            direccion_cliente ,
-                            codigo_postal_cliente ,
-                            ciudad_cliente ,
-                            pais_cliente,
-                            c.city_id;
-
 -- ==================================================================================================
 -- Inserting data to the SHOP table 
 -- ==================================================================================================
@@ -132,6 +96,21 @@ INSERT INTO SHOP(address_id)
 -- ==================================================================================================
 -- Inserting data to the EMPLOYEE table 
 -- ==================================================================================================
+
+-- Employee address
+INSERT INTO ADDRESS(direction, postal_code, city_id)
+    SELECT  direccion_empleado, 
+            (CASE WHEN codigo_postal_empleado = '-' THEN NULL ELSE codigo_postal_empleado END)AS CODE,
+            c.city_id
+        FROM TEMPORARY 
+            INNER JOIN CITY c ON ciudad_empleado = c.name 
+            WHERE nombre_empleado != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_empleado) 
+                GROUP BY    nombre_empleado,
+                            direccion_empleado ,
+                            codigo_postal_empleado ,
+                            ciudad_empleado ,
+                            pais_empleado,
+                            c.city_id;
                     
 INSERT INTO EMPLOYEE(name, surname, email, active, username, password, shop_id, address_id)                                            
     SELECT  SUBSTR(nombre_empleado, 1, INSTR(nombre_empleado, ' ')-1) as name,
@@ -163,6 +142,26 @@ INSERT INTO EMPLOYEE(name, surname, email, active, username, password, shop_id, 
 -- ==================================================================================================
 -- Inserting data to the CUSTOMER table 
 -- ==================================================================================================
+
+-- Customer address
+
+INSERT INTO ADDRESS(direction, postal_code, city_id)
+    SELECT  direccion_cliente, 
+            (CASE WHEN codigo_postal_cliente = '-' THEN NULL ELSE codigo_postal_cliente END) AS CODE,
+            c.city_id
+        FROM TEMPORARY 
+            INNER JOIN CITY c ON ciudad_cliente = c.name 
+            WHERE nombre_cliente != '-' AND c.country_id = (SELECT country_id FROM COUNTRY WHERE name = pais_cliente) 
+                GROUP BY    nombre_cliente ,
+                            correo_cliente ,
+                            cliente_activo ,
+                            fecha_creacion ,
+                            tienda_preferida ,
+                            direccion_cliente ,
+                            codigo_postal_cliente ,
+                            ciudad_cliente ,
+                            pais_cliente,
+                            c.city_id;
 
 INSERT INTO CUSTOMER(name, surname, email, registration_date, active, shop_id, address_id)
 SELECT  SUBSTR(t.nombre_cliente, 1, INSTR(t.nombre_cliente, ' ')-1) as name,

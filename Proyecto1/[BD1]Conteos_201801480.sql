@@ -30,3 +30,5 @@ SELECT table_name,
        to_number(extractvalue(xmltype(dbms_xmlgen.getxml('SELECT COUNT(*) c FROM '||owner||'.'||table_name)),'/ROWSET/ROW/C')) as COUNT
 FROM all_tables
 WHERE owner = 'DB1'
+
+

@@ -187,7 +187,7 @@ INNER JOIN (
     SELECT  a.name AS nombre_actor,
             a.surname AS apellido_actor
     FROM ACTOR a
-        WHERE a.name LIKE 'Matthew' AND a.surname = 'Johansson'
+        WHERE a.name LIKE 'Matthew' AND a.surname LIKE 'Johansson'
 ) ON nombre = nombre_actor 
 WHERE apellido <> apellido_actor;
 
